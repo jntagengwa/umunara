@@ -1,0 +1,212 @@
+@import "react-big-calendar/lib/sass/styles";
+@import "./blog.scss";
+@import "./calender.scss";
+@import "./donate.scss";
+@import "./form.scss";
+@import "./launcher.scss";
+@import "./masonryPost.scss";
+@import "./memberForm.scss";
+@import "./members.scss";
+@import "./postMasonry.scss";
+@import "./postGrid.scss";
+@import "./tagsRow.scss";
+
+html body {
+  font-family: "Josefin Sans", sans-serif, "Source Sans Pro", sans-serif;
+  //font-weight: 500;
+  //background-color: #f8f9fa;
+  //background-color: #f8f9fa;
+}
+#root {
+  background-image: linear-gradient(
+      236deg,
+      transparent 0%,
+      transparent 6%,
+      rgba(42, 142, 255, 0.12) 6%,
+      rgba(42, 142, 255, 0.12) 22%,
+      transparent 22%,
+      transparent 100%
+    ),
+    linear-gradient(
+      146deg,
+      transparent 0%,
+      transparent 20%,
+      rgba(42, 142, 255, 0.12) 20%,
+      rgba(42, 142, 255, 0.12) 47%,
+      transparent 47%,
+      transparent 100%
+    ),
+    linear-gradient(
+      236deg,
+      transparent 0%,
+      transparent 24%,
+      rgba(42, 142, 255, 0.12) 24%,
+      rgba(42, 142, 255, 0.12) 62%,
+      transparent 62%,
+      transparent 100%
+    ),
+    linear-gradient(
+      146deg,
+      transparent 0%,
+      transparent 73%,
+      rgba(42, 142, 255, 0.12) 73%,
+      rgba(42, 142, 255, 0.12) 75%,
+      transparent 75%,
+      transparent 100%
+    ),
+    linear-gradient(191deg, rgb(248, 249, 250), rgb(248, 249, 250));
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+a {
+  text-decoration: none !important;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Josefin Sans", sans-serif;
+  color: #007cc7;
+}
+
+p {
+  font-family: "Source Sans Pro", sans-serif;
+}
+
+.about-main {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  //width: 80%;
+  //justify-content: center;
+  //align-items: center;
+  .header {
+    margin: 2rem;
+    h1 {
+      font-family: "Josefin Sans", sans-seriff;
+      color: #007cc7;
+    }
+  }
+  .content {
+    display: flex;
+    justify-content: center;
+    //align-items: center;
+  }
+  .about-word {
+    padding: 1rem;
+    p {
+      font-family: "Source Sans Pro", sans-serif;
+    }
+  }
+  .img {
+    padding: 1rem;
+    img {
+      width: 25rem;
+      height: 20rem;
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0px 0px 5px #203647;
+    }
+  }
+}
+
+@media (max-width: 1000px) {
+  .about-main {
+    .content {
+      flex-direction: column;
+    }
+    .img {
+      display: flex;
+      justify-content: center;
+    }
+  }
+}
+@media (max-width: 400px) {
+  .about-main {
+    .img {
+      img {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.history-main {
+  display: flex;
+  flex-direction: column;
+  padding: 0 30px;
+  //width: 78%;
+  .header {
+    margin: 2rem;
+    h1 {
+      font-family: "Josefin Sans", sans-serif;
+      color: #007cc7;
+    }
+  }
+  .history-content {
+    display: flex;
+    flex-direction: row;
+    .left {
+      padding: 1rem;
+      display: grid;
+      font-family: "Source Sans Pro", sans-serif;
+    }
+    .right {
+      padding: 1rem;
+      //display: grid;
+      font-family: "Source Sans Pro", sans-serif;
+      .img {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        img {
+          display: flex;
+          width: 75%;
+          height: 20%;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .history-main {
+    .history-content {
+      flex-direction: column;
+      .right {
+        .img {
+          img {
+            width: 40%;
+          }
+        }
+      }
+    }
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.row {
+  margin: 4em 20px;
+}
+
+.overlay::before {
+  z-index: 1;
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 18%,
+    rgba(78, 145, 177, 0.8) 99%,
+    rgba(88, 194, 243, 0.8) 100%
+  );
+}

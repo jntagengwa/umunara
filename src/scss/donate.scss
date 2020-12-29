@@ -1,0 +1,58 @@
+.d-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 150px 30px;
+}
+
+h1 {
+  font-family: "Alegreya Sans SC", sans-serif;
+}
+
+p {
+  font-family: "Source Sans Pro", sans-serif;
+}
+
+ul {
+  font-family: "Source Sans Pro", sans-serif;
+}
+
+.d-form {
+  display: flex;
+  align-items: center;
+  .submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 10px;
+    width: 120px;
+    padding: 10px;
+    border-color: #ffffff;
+    border-radius: 0.5rem;
+    font-size: 20px;
+    background-color: #3577b9;
+    color: rgb(255, 255, 255);
+    transition: 0.5s;
+    #paypal {
+      margin-left: 0.4rem;
+    }
+  }
+  .submit:hover {
+    transform: scale(1.05, 1.05);
+    background-color: white;
+    color: #004e7c;
+    border-color: #004e7c;
+  }
+}
+
+@media (max-width: 530px) {
+  .d-info {
+    flex-direction: column;
+    justify-content: center;
+  }
+  .d-form {
+    .submit {
+      margin-left: 0;
+    }
+  }
+}
