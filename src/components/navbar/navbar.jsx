@@ -35,6 +35,8 @@ const NavBar = ({ drawerClickHandler }) => {
           <Link className="items" to="/about-us">
             About Us
           </Link>
+        </div>
+        <div className="rightt">
           <div className="donate-nav">
             <form
               action="https://www.paypal.com/donate"
@@ -59,9 +61,9 @@ const NavBar = ({ drawerClickHandler }) => {
               </button>
             </form>
           </div>
-        </div>
-        <div className="drawer-toggle">
-          <DrawerToggle click={drawerClickHandler} />
+          <div className="drawer-toggle">
+            <DrawerToggle click={drawerClickHandler} />
+          </div>
         </div>
       </nav>
     </header>

@@ -53,14 +53,12 @@ class History extends Component {
               servants stationed in various parts of the world. In addition to
               conference calls held regularly, Umunara’s website enabled people
               who were unable to participate live to the conference to listen to
-              the message preached every Friday. We thank Mr. Sylvain Ntwali who
-              selflessly helped us to put together and to maintain this site.
-              Furthermore, Umunara has been able to start a number of
-              departments that help to answer some of the questions believers
-              have. In the interest of strengthening families, youth, female and
-              male departments were established. Once in a while, female and
-              male departments meet together to offer valuable teachings needed
-              for couples and couples to be.
+              the message preached every Friday. Furthermore, Umunara has been
+              able to start a number of departments that help to answer some of
+              the questions believers have. In the interest of strengthening
+              families, youth, female and male departments were established.
+              Once in a while, female and male departments meet together to
+              offer valuable teachings needed for couples and couples to be.
             </p>
           </div>
           <div className="right">
@@ -68,29 +66,36 @@ class History extends Component {
               As prayer is the key to the success of Umunara, a Prayer
               department was established to coordinate the prayer chain 24/7 at
               Umunara; this helps us to have someone at the rampant all the time
-              (ku izamu ry’Umunara). Mrs. Marie-Therese Gakumba lead this
-              department. Fasting prayers are being organized throughout the
-              month and some over night prayers have been and continue to be
-              held thanks to your commitment. As at Umunara we are committed to
-              the thorough learning and/or teaching of the Word of God, various
-              seminars have been organized over the conference calls and experts
-              have given topical teachings. We thank all who have participated
-              into these programs and more participation in the future is
-              requested!
+              (ku izamu ry’Umunara). Mrs. Marie-Therese Gakumba and Ms. Aline
+              Niyonsaba lead this department. Fasting prayers are being
+              organized throughout the month and some over night prayers have
+              been and continue to be held thanks to your commitment. If you
+              want to get involved into this department please be in touch with
+              its leaders mentioned above. As at Umunara we are committed to the
+              thorough learning and/or teaching of the Word of God, various
+              seminars and Bible studies have been organized over the conference
+              calls and experts have given topical teachings. We thank all who
+              have participated into these programs and more participation in
+              the future is requested!
             </p>
             <p>
               At this particular juncture, it is safe to say that we are looking
-              into the future with greate hope and anticipation. Recently,
+              into the future with great hope and anticipation. In the past,
               Freeconferencepro has experienced a massive increase in usage of
               their conference systems that caused our experiencing connectivity
               problems during our services. Fortunately, they upgraded their
               systems and have allocated us a new conference access number which
-              is 218-548-0820; the pass cod remained the same. This upgrade
-              temporarily corrected our capability issues but we still have a
-              major challenge of purchasing our own conferencing system to
-              permanently resolve these issues. We also thank God that Umunara,
-              Inc. has a Radio now. All of these new projects will need
-              financial resources to maintain them. If and when the Holy Spirit
+              is <strong>218-548-0820</strong>; the pass cod remained the same.
+              This upgrade corrected our capability issues, and enabled the
+              possibility to connect into our services through one’s internet
+              service. FreeConferencePro also created the video conferencing
+              possibilities which we might start use in the future. God is good;
+              we have decided to upgrade and give a new look to our website
+              thanks the Mr. Jean-Fidele Ntagengwa. In the process Jean-Fidele
+              helped to cut some of our costs by getting rid of the radio which
+              had lots of limitations and started a new program: podcast. You
+              can follow us live on Fridays and you listen to our past message
+              of your choosing anytime you want. If and when the Holy Spirit
               moves you to support them please make your check or money order to
               Umunara, Inc and send it at P.O Box 505194, Chelsea, MA 02150, USA
               and thank you.
@@ -101,15 +106,13 @@ class History extends Component {
               the task that God entrusted to us. Therefore, Umunara, Inc. is
               requesting those who want to partner with us as either Active
               Members or Honorary Members or as partners in fulfilling the Great
-              Commission to fill out the form found further below and to
-              indicate in which capacity they want to help.
+              Commission to fill out the form found on this website...
             </p>
             <p>
               Thank you so much for your support and may God Almighty bless you
               in a special way. If you want to contact either of the Committee
-              members, please drop a line at postmaster@umunara.org or while you
-              are on our website go to contact us or send us a written note at
-              Umunara, Inc. P.O Box 505194, Chelsea, MA 02150.
+              members, please drop a line at postmaster@umunara.org or send us a
+              written note at Umunara, Inc. P.O Box 505194, Chelsea, MA 02150.
             </p>
             <div className="img">
               <img src={img} alt="logo" />

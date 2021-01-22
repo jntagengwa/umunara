@@ -20,7 +20,7 @@ export class Login extends Form {
       const { data } = this.state;
       await auth.login(data.username, data.password);
       const user = auth.getCurrentUser();
-      if (user && user.isAdmin) window.location = "/#/blog";
+      if (user && user.isAdmin) window.location = "/blog";
       else window.location = "/";
     } catch (ex) {
       if (ex.response && ex.response.status === 400) {
@@ -31,7 +31,7 @@ export class Login extends Form {
     }
   };
   render() {
-    if (auth.getCurrentUser()) return <Redirect to="/#/" />;
+    if (auth.getCurrentUser()) return <Redirect to="/" />;
 
     return (
       <div className="inner-container">

@@ -53,3 +53,32 @@
   transform: translateX(0);
   transition: opacity 0.8s ease-in, transform 0.8s ease-in-out;
 }
+
+.donate-side {
+  display: flex;
+  padding-top: 40px;
+  align-items: center;
+  .submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 6rem;
+    height: 3rem;
+    padding: 1rem;
+    border-color: #004e7c;
+    border-radius: 0.5rem;
+    //font-size: 2rem;
+    background-color: rgba(255, 255, 0, 0);
+    color: #004e7c;
+    transition: 0.5s;
+    #paypal {
+      margin-left: 0.4rem;
+    }
+  }
+  .submit:hover {
+    transform: scale(1.05, 1.05);
+    background-color: white;
+    color: #004e7c;
+    border-color: #004e7c;
+  }
+}

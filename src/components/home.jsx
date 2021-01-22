@@ -18,24 +18,34 @@ class Home extends Component {
             </h3>
             <p>
               We are in the business of making disciples of Jesus Christ in all
-              nations and to encourage them to obey His commandments. We believe
-              that the Bible, as it is inspired by God, is the only instrument
-              that helps us to know the will of God and to know where to get our
-              salvation: on the Cross Jesus Christ paid the price on our behalf,
-              imparted on us His righteousness and our responsibility is to
-              impart on him our sins and to receive Him as our personal Savior.
-              Ku Munara duhura na Yesu: Abarushye n’abaremerewe bararuhuka,
-              abarwayi barakira, Impumyi zirahumuka, ibipfamatwi birumva,
-              ibimuga biragenda, kandi abakene baragezwaho ubutumwa bwiza
-              (Yohana 11:5). At Umunara, we welcome everybody regardless of
-              their denomination; indeed whether you are a Christian or not
-              please join us every Friday at 10:00 PM Eastern Time (USA &
-              Canada) that is, 0300GMT at 1-218-548-0820, Pass Code 13579# so
-              that we can be together at the watch and station ourselves on the
-              ramparts (Habakkuk 2:1). This is not a toll free number! A calling
-              card or a long distance plan required! For more scheduled events,
-              please check on our calendar or just open this website and follow
-              us on radio.
+              nations and to encourage them to obey His commandments. This is
+              our Mission: to fulfill the Great Commission found in{" "}
+              <strong>Matthew 28:16-30</strong>. We believe that the Bible, as
+              it is inspired by God, is the only instrument that helps us to
+              know the will of God and to know where to get our salvation: on
+              the Cross Jesus Christ paid the price on our behalf, imparted on
+              us His righteousness and our responsibility is to impart on him
+              our sins and to receive Him as our personal Savior. Ku Munara
+              duhura na Yesu: Abarushye n’abaremerewe bararuhuka, abarwayi
+              barakira, Impumyi zirahumuka, ibipfamatwi birumva, ibimuga
+              biragenda, kandi abakene baragezwaho ubutumwa bwiza (Yohana 11:5).
+              At Umunara, we welcome everybody regardless of their denomination;
+              indeed whether you are a Christian or not please join us every
+              Friday at 10:00 PM Eastern Time (USA & Canada) that is, 0300GMT at{" "}
+              <strong>1-218-548-0820</strong>, Pass Code <strong>13579#</strong>{" "}
+              so that we can be together at the watch and station ourselves on
+              the ramparts (Habakkuk 2:1). This is not a toll free number! A
+              calling card or a long distance plan required! For more scheduled
+              events, please check on our calendar or just open this website and
+              follow us on our{" "}
+              <a
+                href="https://umunarainc.podbean.com/"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Podcast
+              </a>
+              .
             </p>
           </div>
         </div>

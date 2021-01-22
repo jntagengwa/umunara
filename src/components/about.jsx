@@ -27,11 +27,12 @@ class About extends Component {
               Umunara. As the number of those who were interested in joining
               prayers coming from all continents grew, on September 23, 2007 God
               led the group to register and to set up an account with
-              FreeConferencePro. Access number of this account is 1-218-548-0820
-              and the pass code is 13579#. Currently, Umunara is managed by a
-              committee led by The Rev. Dr. Jean Baptiste Ntagengwa. If you want
-              to contact them, please drop a line at postmaster@umunara.org or
-              go to contact us. God’s blessings to you!
+              FreeConferencePro. Access number of this account is{" "}
+              <strong>1-218-548-0820</strong>
+              and the pass code is <strong>13579#</strong>. Currently, Umunara
+              is managed by a committee led by The Rev. Dr. Jean Baptiste
+              Ntagengwa. If you want to contact them, please drop a line at
+              postmaster@umunara.org. God’s blessings to you!
             </p>
           </div>
           <div className="img">
