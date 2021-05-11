@@ -33,7 +33,7 @@ export class Register extends Form {
   render() {
     return (
       <div className="inner-container">
-        <div className="header">Register</div>
+        <div className="header">Sing Up</div>
         <div className="box">
           <div className="l-form">
             <div className="form-set">
@@ -42,7 +42,7 @@ export class Register extends Form {
                 {this.renderInput("username", "Username")}
                 {this.renderInput("password", "Password", "password")}
                 <div className="buttons">
-                  <div className="l-con">{this.renderButton("Register")}</div>
+                  <div className="l-con">{this.renderButton("Sign Up")}</div>
                 </div>
               </form>
             </div>

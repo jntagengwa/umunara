@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import auth from "../services/authService";
 import Table from "./common/table";
 
-class RegisterTable extends Component {
+class RegistrationTable extends Component {
   columns = [
     { path: "firstName", label: "First Name" },
     { path: "lastName", label: "Last Name" },
@@ -15,9 +15,9 @@ class RegisterTable extends Component {
 
   deleteColumn = {
     key: "delete",
-    content: (register) => (
+    content: (registration) => (
       <button
-        onClick={() => this.props.onDelete(register)}
+        onClick={() => this.props.onDelete(registration)}
         className="btn btn-sm"
         style={{ backgroundColor: "rgb(255, 59, 48)", color: "white" }}
       >
@@ -33,12 +33,12 @@ class RegisterTable extends Component {
   }
 
   render() {
-    const { registers, onSort, sortColumn } = this.props;
+    const { registrations, onSort, sortColumn } = this.props;
 
     return (
       <Table
         columns={this.columns}
-        data={registers}
+        data={registrations}
         sortColumn={sortColumn}
         onSort={onSort}
       />
@@ -46,4 +46,4 @@ class RegisterTable extends Component {
   }
 }
 
-export default RegisterTable;
+export default RegistrationTable;

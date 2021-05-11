@@ -42,7 +42,7 @@ const SideDrawer = ({ user, show, backdropHandler }) => {
           to="/registrations/new"
           onClick={backdropHandler}
         >
-          Register
+          Registration
         </NavLink>
         {user && user.isAdmin && (
           <NavLink className="nav-item" to="/members" onClick={backdropHandler}>

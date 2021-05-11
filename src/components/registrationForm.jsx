@@ -1,7 +1,10 @@
 import React from "react";
 import Joi from "joi-browser";
 import Form from "./common/form";
-import { getRegister, saveRegister } from "../services/registerService";
+import {
+  getRegistration,
+  saveRegistration,
+} from "../services/registrationService";
 import auth from "../services/authService";
 //import "./sellerForm.scss";
 
@@ -35,13 +38,13 @@ class RegistrationForm extends Form {
   //     this.setState({ genres });
   //   }
 
-  async populateRegister() {
+  async populateRegistration() {
     try {
-      const registerId = this.props.match.params.id;
-      if (registerId === "new") return;
+      const registrationId = this.props.match.params.id;
+      if (registrationId === "new") return;
 
-      const { data: register } = await getMember(registerId);
-      this.setState({ data: this.mapToViewModel(register) });
+      const { data: registration } = await getRegistration(registrationId);
+      this.setState({ data: this.mapToViewModel(registration) });
     } catch (ex) {
       if (ex.response && ex.response.status === 404)
         this.props.history.replace("/not-found");
@@ -49,24 +52,24 @@ class RegistrationForm extends Form {
   }
 
   async componentDidMount() {
-    await this.populateMember();
+    await this.populateRegistration();
   }
 
-  mapToViewModel(register) {
+  mapToViewModel(registration) {
     return {
-      _id: register._id,
-      firstName: register.firstName,
-      lastName: register.lastName,
-      email: register.email,
-      homeChurch: register.homeChurch,
-      thoughts: register.thoughts,
-      hopes: register.hopes,
-      getInvolved: register.getInvolved,
+      _id: registration._id,
+      firstName: registration.firstName,
+      lastName: registration.lastName,
+      email: registration.email,
+      homeChurch: registration.homeChurch,
+      thoughts: registration.thoughts,
+      hopes: registration.hopes,
+      getInvolved: registration.getInvolved,
     };
   }
 
   doSubmit = async () => {
-    await saveRegister(this.state.data);
+    await saveRegistration(this.state.data);
     let user = auth.getCurrentUser();
 
     if (user && (user = user.isAdmin)) this.props.history.push("/blog");
