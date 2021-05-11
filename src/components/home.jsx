@@ -16,7 +16,7 @@ class Home extends Component {
               We are glad you took some time out of your busy schedule to check
               on us.
             </h3>
-            <p>
+            <p className="home-p">
               We are in the business of making disciples of Jesus Christ in all
               nations and to encourage them to obey His commandments. This is
               our Mission: to fulfill the Great Commission found in{" "}

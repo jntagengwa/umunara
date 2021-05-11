@@ -21,6 +21,8 @@ import ProtectedRoute from "./components/common/protectedRoute";
 import SideDrawer from "./components/sideDrawer/sideDrawer";
 import "react-toastify/dist/ReactToastify.css";
 import "./scss/App.scss";
+import RegistrationForm from "./components/registrationForm";
+import Registrations from "./components/registrations";
 
 class App extends Component {
   state = {
@@ -67,7 +69,9 @@ class App extends Component {
             <ProtectedRoute path="/blog/:id" component={PostForm} />
             <Route path="/blog" component={Blog} />
             <Route path="/members/:id" component={MemberForm} />
+            <Route path="/registrations/:id" component={RegistrationForm} />
             <ProtectedRoute path="/members" component={Members} />
+            <ProtectedRoute path="/registrations" component={Registrations} />
             <Route path="/login" component={Launcher} />
             <Route path="/logout" component={Logout} />
             <Route path="/not-found" component={NotFound} />

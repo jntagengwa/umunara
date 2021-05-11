@@ -37,9 +37,25 @@ const SideDrawer = ({ user, show, backdropHandler }) => {
         >
           Membership
         </NavLink>
+        <NavLink
+          className="nav-item"
+          to="/registrations/new"
+          onClick={backdropHandler}
+        >
+          Register
+        </NavLink>
         {user && user.isAdmin && (
           <NavLink className="nav-item" to="/members" onClick={backdropHandler}>
             Members
+          </NavLink>
+        )}
+        {user && user.isAdmin && (
+          <NavLink
+            className="nav-item"
+            to="/registrations"
+            onClick={backdropHandler}
+          >
+            Registrations
           </NavLink>
         )}
         <NavLink className="nav-item" to="/history" onClick={backdropHandler}>
@@ -50,7 +66,7 @@ const SideDrawer = ({ user, show, backdropHandler }) => {
         </NavLink>{" "}
         {!user && (
           <NavLink className="nav-item" to="/login" onClick={backdropHandler}>
-            Login/Register
+            Login/Sign up
           </NavLink>
         )}
         {user && (

@@ -85,7 +85,9 @@ class Footer extends Component {
           </div>
         </div>
         <div className="footer-content">
-          <p className="footer-p">2021 © Umunara Inc. All Rights Reserved</p>
+          <p className="footer-p">
+            {new Date().getFullYear()} © Umunara Inc. All Rights Reserved
+          </p>
           <div className="socials">
             <a
               href="https://www.facebook.com/umunara.prayer"
