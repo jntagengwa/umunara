@@ -26,9 +26,9 @@ const NavBar = ({ drawerClickHandler }) => {
           <Link className="items" to="/blog">
             Blog
           </Link>
-          <Link className="items" to="/registrations/new">
+          {/* <Link className="items" to="/registrations/new">
             Registration
-          </Link>
+          </Link> */}
           <Link className="items" to="/donate">
             Donate
           </Link>

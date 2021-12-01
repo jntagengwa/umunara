@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import RegistrationTable from "./registrationTable";
+import RegistrationTable from "./registerTable";
 import Pagination from "./common/pagination";
 import {
   getRegistrations,
