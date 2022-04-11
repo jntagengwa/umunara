@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import SlideShow from "./slideShow";
-import xmas from "../images/X-mass flyer.jpg";
+import xmas from "../images/PHOTO.jpg";
 import "./home.scss";
 
 class Home extends Component {
