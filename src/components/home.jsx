@@ -56,12 +56,10 @@ class Home extends Component {
                 .
               </p>
             </div>
-            <img
-              className="xmass"
-              style={{ marginLeft: "40px" }}
-              src={xmas}
-              alt="Christmas"
-            />
+            <div className="column">
+              <h3>IGITARAMO CYA PASIKA</h3>
+              <img className="xmass" src={xmas} alt="Christmas" />
+            </div>
           </div>
         </div>
         <div className="frame">
