@@ -62,7 +62,7 @@ export interface ProfileInsert {
 export interface ProfileUpdate {
   approved_at?: string | null
   avatar_url?: string | null
-  email?: string
+  email?: string | null
   full_name?: string | null
   role?: ProfileRole
   updated_at?: string

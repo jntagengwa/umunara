@@ -187,6 +187,28 @@ as $$
   );
 $$;
 
+create function private.can_register_for_event(target_event_id uuid)
+returns boolean
+language sql
+security definer
+stable
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = (select auth.uid())
+      and role in ('member', 'editor', 'admin')
+  )
+  and exists (
+    select 1
+    from public.events
+    where id = target_event_id
+      and status = 'published'
+      and visibility in ('public', 'member')
+  );
+$$;
+
 revoke all on schema public from public;
 grant usage on schema public to anon, authenticated, service_role;
 revoke all on schema private from public, anon, authenticated;
@@ -194,7 +216,9 @@ grant usage on schema private to authenticated;
 revoke all on function private.set_updated_at() from public;
 revoke all on function private.create_profile_for_new_user() from public;
 revoke all on function private.has_minimum_role(text) from public;
+revoke all on function private.can_register_for_event(uuid) from public;
 grant execute on function private.has_minimum_role(text) to authenticated;
+grant execute on function private.can_register_for_event(uuid) to authenticated;
 
 revoke all on table public.profiles, public.categories, public.posts, public.events,
   public.event_registrations, public.media_assets, public.resources, public.site_settings,
@@ -206,6 +230,9 @@ grant select on public.profiles, public.categories, public.posts, public.events,
 grant insert, update, delete on public.categories, public.posts, public.events, public.event_registrations,
   public.media_assets, public.resources, public.site_settings, public.audit_log to authenticated;
 grant insert, update, delete on public.profiles to authenticated;
+grant all privileges on table public.profiles, public.categories, public.posts, public.events,
+  public.event_registrations, public.media_assets, public.resources, public.site_settings,
+  public.audit_log to service_role;
 
 alter table public.profiles enable row level security;
 alter table public.categories enable row level security;
@@ -259,11 +286,20 @@ create policy "event registrations: users read own or editors read all" on publi
   using (profile_id = (select auth.uid()) or (select private.has_minimum_role('editor')));
 create policy "event registrations: users create own or editors create" on public.event_registrations
   for insert to authenticated
-  with check (profile_id = (select auth.uid()) or (select private.has_minimum_role('editor')));
+  with check (
+    (profile_id = (select auth.uid()) and (select private.can_register_for_event(event_id)))
+    or (select private.has_minimum_role('editor'))
+  );
 create policy "event registrations: users update own or editors update" on public.event_registrations
   for update to authenticated
-  using (profile_id = (select auth.uid()) or (select private.has_minimum_role('editor')))
-  with check (profile_id = (select auth.uid()) or (select private.has_minimum_role('editor')));
+  using (
+    (profile_id = (select auth.uid()) and (select private.can_register_for_event(event_id)))
+    or (select private.has_minimum_role('editor'))
+  )
+  with check (
+    (profile_id = (select auth.uid()) and (select private.can_register_for_event(event_id)))
+    or (select private.has_minimum_role('editor'))
+  );
 create policy "event registrations: users delete own or editors delete" on public.event_registrations
   for delete to authenticated
   using (profile_id = (select auth.uid()) or (select private.has_minimum_role('editor')));
