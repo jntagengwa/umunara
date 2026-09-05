@@ -187,8 +187,8 @@ as $$
   );
 $$;
 
-revoke all on schema public from anon, authenticated;
-grant usage on schema public to anon, authenticated;
+revoke all on schema public from public;
+grant usage on schema public to anon, authenticated, service_role;
 revoke all on schema private from public, anon, authenticated;
 grant usage on schema private to authenticated;
 revoke all on function private.set_updated_at() from public;
