@@ -9,14 +9,6 @@ import slideFour from '../../../src/images/image_4.jpg'
 import slideFive from '../../../src/images/image_5.jpg'
 import logo from '../../../src/umunara_logo.png'
 
-const navigationItems = [
-  { href: '/', label: 'Home' },
-  { href: '/calendar', label: 'Calendar' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/donate', label: 'Donate' },
-  { href: '/about-us', label: 'About Us' },
-]
-
 const slides: Array<{ image: StaticImageData; alt: string }> = [
   { image: slideOne, alt: 'Umunara community gathering' },
   { image: slideTwo, alt: 'Umunara worship service' },
@@ -32,15 +24,6 @@ export function LegacyHomePage() {
         <Link className="site-logo" href="/" aria-label="Umunara home">
           <Image src={logo} alt="Umunara" width={400} height={100} priority />
         </Link>
-        <nav aria-label="Main navigation">
-          <ul className="site-navigation">
-            {navigationItems.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href}>{item.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
         <form action="https://www.paypal.com/donate" method="post" target="_blank">
           <input type="hidden" name="hosted_button_id" value="KTYR3LCAUW7VL" />
           <button type="submit">Donate with PayPal</button>
