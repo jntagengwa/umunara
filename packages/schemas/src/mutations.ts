@@ -8,6 +8,7 @@ export const contentQuerySchema = pageQuerySchema
   })
   .strict()
 export type ContentQuery = z.infer<typeof contentQuerySchema>
+export type ContentQueryInput = z.input<typeof contentQuerySchema>
 
 const postFields = z
   .object({
@@ -32,10 +33,11 @@ export const postCreateSchema = postFields.extend({
   status: postFields.shape.status.default('draft'),
   visibility: postFields.shape.visibility.default('public'),
 })
+export type PostCreateInput = z.input<typeof postCreateSchema>
 export const postUpdateSchema = postFields
   .partial()
   .refine((value) => Object.keys(value).length > 0, 'At least one field is required.')
-export type PostUpdateInput = z.infer<typeof postUpdateSchema>
+export type PostUpdateInput = z.input<typeof postUpdateSchema>
 
 export const eventCreateSchema = z
   .object({
@@ -60,6 +62,8 @@ export const eventCreateSchema = z
     path: ['endsAt'],
   })
 
+export type EventCreateInput = z.input<typeof eventCreateSchema>
+
 export const settingKeySchema = z
   .string()
   .min(1)
@@ -77,3 +81,4 @@ const jsonValue: z.ZodType<JsonValue> = z.lazy(() =>
   ]),
 )
 export const siteSettingUpdateSchema = z.object({ value: jsonValue }).strict()
+export type SiteSettingUpdateInput = z.input<typeof siteSettingUpdateSchema>

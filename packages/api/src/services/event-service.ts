@@ -4,6 +4,8 @@ import {
   contentQuerySchema,
   eventCreateSchema,
   type ContentQuery,
+  type ContentQueryInput,
+  type EventCreateInput,
   type EventDto,
 } from '@umunara/schemas'
 import type { Actor } from '../auth/require-user'
@@ -39,14 +41,14 @@ export class EventService {
     private readonly cache: CacheInvalidator,
   ) {}
 
-  async list(actor: Actor | null, input: unknown): Promise<PaginatedResult<EventDto>> {
+  async list(actor: Actor | null, input: ContentQueryInput): Promise<PaginatedResult<EventDto>> {
     const query = contentQuerySchema.parse(input)
     if (query.scope !== 'public') requireRole(actor, query.scope === 'all' ? 'editor' : 'member')
     const result = await this.repository.list(query)
     return { ...result, data: result.data.map(toEventDto) }
   }
 
-  async create(actor: Actor, input: unknown): Promise<EventDto> {
+  async create(actor: Actor, input: EventCreateInput): Promise<EventDto> {
     requireRole(actor, 'editor')
     const value = eventCreateSchema.parse(input)
     const row = await this.repository.create({

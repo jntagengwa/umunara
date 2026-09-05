@@ -1,6 +1,10 @@
 import 'server-only'
 import type { Json, SiteSettingRow } from '@umunara/database'
-import { settingKeySchema, siteSettingUpdateSchema } from '@umunara/schemas'
+import {
+  settingKeySchema,
+  siteSettingUpdateSchema,
+  type SiteSettingUpdateInput,
+} from '@umunara/schemas'
 import type { Actor } from '../auth/require-user'
 import { requireRole } from '../auth/require-role'
 import type { CacheInvalidator } from '../cache/invalidation'
@@ -31,7 +35,7 @@ export class SiteSettingsService {
     return { key: row.key, value: row.value }
   }
 
-  async update(actor: Actor, key: string, input: unknown): Promise<SiteSettingDto> {
+  async update(actor: Actor, key: string, input: SiteSettingUpdateInput): Promise<SiteSettingDto> {
     requireRole(actor, 'editor')
     const parsedKey = settingKeySchema.parse(key)
     const { value } = siteSettingUpdateSchema.parse(input)

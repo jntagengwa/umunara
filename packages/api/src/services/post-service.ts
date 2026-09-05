@@ -6,6 +6,9 @@ import {
   postUpdateSchema,
   idSchema,
   type ContentQuery,
+  type ContentQueryInput,
+  type PostCreateInput,
+  type PostUpdateInput,
   type PostDto,
 } from '@umunara/schemas'
 import type { Actor } from '../auth/require-user'
@@ -31,7 +34,7 @@ export class PostService {
     private readonly cache: CacheInvalidator,
   ) {}
 
-  async list(actor: Actor | null, input: unknown): Promise<PaginatedResult<PostDto>> {
+  async list(actor: Actor | null, input: ContentQueryInput): Promise<PaginatedResult<PostDto>> {
     const query = contentQuerySchema.parse(input)
     if (query.scope !== 'public') requireRole(actor, query.scope === 'all' ? 'editor' : 'member')
     const result = await this.repository.list(query)
@@ -45,7 +48,7 @@ export class PostService {
     return toPostDto(row)
   }
 
-  async create(actor: Actor, input: unknown): Promise<PostDto> {
+  async create(actor: Actor, input: PostCreateInput): Promise<PostDto> {
     requireRole(actor, 'editor')
     const values = postCreateSchema.parse(input)
     const row = await this.repository.create({
@@ -58,7 +61,7 @@ export class PostService {
     return this.finish(actor, 'create', row)
   }
 
-  async update(actor: Actor, id: string, input: unknown): Promise<PostDto> {
+  async update(actor: Actor, id: string, input: PostUpdateInput): Promise<PostDto> {
     requireRole(actor, 'editor')
     const values = postUpdateSchema.parse(input)
     const previous = await this.find(id)

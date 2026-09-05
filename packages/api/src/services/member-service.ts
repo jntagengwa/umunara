@@ -22,7 +22,7 @@ export class MemberService {
     return this.setRole(actor, id, 'member')
   }
 
-  async setRole(actor: Actor, id: string, input: unknown): Promise<Actor> {
+  async setRole(actor: Actor, id: string, input: Role): Promise<Actor> {
     requireRole(actor, 'admin')
     const role = roleSchema.parse(input)
     const row = await this.repository.setRole(
