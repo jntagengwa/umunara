@@ -18,7 +18,19 @@
     "allowJs": true,
     "noEmit": true,
     "incremental": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@umunara/schemas": [
+        "../../packages/schemas/src/index.ts"
+      ],
+      "@umunara/database": [
+        "../../packages/database/src/index.ts"
+      ],
+      "@umunara/database/*": [
+        "../../packages/database/src/*"
+      ]
+    }
   },
   "include": [
     "next-env.d.ts",
