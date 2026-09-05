@@ -9,8 +9,10 @@ coverage/
 # testing
 /coverage
 
-# production
-/build
+# Next.js
+.next/
+out/
+*.tsbuildinfo
 
 # misc
 .DS_Store
