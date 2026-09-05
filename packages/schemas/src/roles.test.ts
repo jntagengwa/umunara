@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { pageQuerySchema, requireRole, roleSchema } from './index'
+import { pageQuerySchema, requireRole, roleSchema, type Role } from './index'
 
 describe('shared contracts', () => {
   it('accepts a bounded table query and rejects an unknown role', () => {
@@ -14,5 +14,6 @@ describe('shared contracts', () => {
   it('requires the configured role or a higher role', () => {
     expect(() => requireRole('member', 'editor')).toThrow('editor role is required')
     expect(() => requireRole('admin', 'editor')).not.toThrow()
+    expect(() => requireRole('owner' as Role, 'admin')).toThrow()
   })
 })

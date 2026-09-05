@@ -12,7 +12,10 @@ const roleRanks: Record<Role, number> = {
 }
 
 export function requireRole(role: Role, minimumRole: Role): void {
-  if (roleRanks[role] < roleRanks[minimumRole]) {
-    throw new Error(`The ${minimumRole} role is required.`)
+  const parsedRole = roleSchema.parse(role)
+  const parsedMinimumRole = roleSchema.parse(minimumRole)
+
+  if (roleRanks[parsedRole] < roleRanks[parsedMinimumRole]) {
+    throw new Error(`The ${parsedMinimumRole} role is required.`)
   }
 }
