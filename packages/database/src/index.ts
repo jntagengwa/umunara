@@ -1,2 +1,14 @@
 export { createBrowserClient } from './client'
-export type { Database, Json } from './database.types'
+export { ContentRepository } from './repositories/content-repository'
+export { ProfileRepository } from './repositories/profile-repository'
+export { SiteSettingsRepository } from './repositories/site-settings-repository'
+export type { PaginatedResult, PageQuery } from './repositories/pagination'
+export type {
+  Database,
+  EventRow,
+  Json,
+  PostRow,
+  ProfileRow,
+  ResourceRow,
+  SiteSettingRow,
+} from './database.types'
