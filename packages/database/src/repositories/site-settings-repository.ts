@@ -1,10 +1,21 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { Database, SiteSettingRow } from '../database.types'
+import type { Database, Json, SiteSettingRow } from '../database.types'
+import { databaseResult } from './result'
 import { getPageRange, toPaginatedResult, type PaginatedResult, type PageQuery } from './pagination'
 
 export class SiteSettingsRepository {
   constructor(private readonly client: SupabaseClient<Database>) {}
+
+  async upsert(key: string, value: Json): Promise<SiteSettingRow> {
+    return databaseResult(
+      await this.client
+        .from('site_settings')
+        .upsert({ key, value }, { onConflict: 'key' })
+        .select('*')
+        .single(),
+    )
+  }
 
   async getByKey(key: string): Promise<SiteSettingRow | null> {
     const { data, error } = await this.client.from('site_settings').select('*').eq('key', key).maybeSingle()

@@ -2,8 +2,10 @@
   "name": "umunara",
   "version": "0.1.0",
   "private": true,
+  "engines": { "node": "^22.22.1 || >=24.0.0" },
   "workspaces": ["apps/*", "packages/*"],
   "devDependencies": {
+    "eslint": "^9.0.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "react": "19.1.1",

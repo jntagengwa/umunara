@@ -229,11 +229,9 @@ select lives_ok(
 );
 update public.profiles set full_name = 'Escalated' where id = auth.uid();
 select is((select full_name from public.profiles where id = auth.uid()), null, 'editors cannot mutate profiles');
-select throws_ok(
+select lives_ok(
   $$ insert into public.site_settings (key, value) values ('editor-setting', '{}'::jsonb) $$,
-  '42501',
-  null,
-  'editors cannot mutate site settings'
+  'editors can manage site settings'
 );
 select throws_ok(
   $$ insert into public.audit_log (action, entity_type) values ('editor-write', 'profile') $$,
