@@ -8,6 +8,8 @@ coverage/
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
 
 # Next.js
 .next/

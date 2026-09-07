@@ -3,6 +3,7 @@ import type { Json, SiteSettingRow } from '@umunara/database'
 import {
   settingKeySchema,
   siteSettingUpdateSchema,
+  homeHeroSchema,
   type SiteSettingUpdateInput,
 } from '@umunara/schemas'
 import type { Actor } from '../auth/require-user'
@@ -38,7 +39,8 @@ export class SiteSettingsService {
   async update(actor: Actor, key: string, input: SiteSettingUpdateInput): Promise<SiteSettingDto> {
     requireRole(actor, 'editor')
     const parsedKey = settingKeySchema.parse(key)
-    const { value } = siteSettingUpdateSchema.parse(input)
+    const parsed = siteSettingUpdateSchema.parse(input)
+    const value = parsedKey === 'home-hero' ? homeHeroSchema.parse(parsed.value) : parsed.value
     const row = await this.repository.upsert(parsedKey, value)
     try {
       await this.audit.write(actor, 'update', 'site-setting', row.id, { key: row.key })

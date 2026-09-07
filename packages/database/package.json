@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
+    "./public": "./src/public.ts",
     "./admin": "./src/admin.ts",
     "./repositories": "./src/repositories/server.ts"
   },
