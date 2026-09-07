@@ -12,6 +12,10 @@ const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1:55431')
   response.setHeader('Content-Type', 'application/json')
   if (url.pathname === '/health') return response.end('{}')
+  if (url.pathname.startsWith('/__test/firewall/')) {
+    response.statusCode = 204
+    return response.end()
+  }
   if (url.pathname === '/__test/approval-pages') {
     paginatedApprovals = request.method === 'POST'
     approved = false
@@ -73,6 +77,22 @@ const server = createServer(async (request, response) => {
       if (paginatedApprovals) {
         const offset = Number(url.searchParams.get('offset') ?? 0)
         const remaining = approved ? 25 : 26
+        if (request.method === 'HEAD') {
+          response.setHeader('Content-Range', `*/${remaining}`)
+          return response.end()
+        }
+        if (offset > remaining) {
+          response.statusCode = 416
+          response.setHeader('Content-Range', `*/${remaining}`)
+          return response.end(
+            JSON.stringify({
+              code: 'PGRST103',
+              message: 'Requested range not satisfiable',
+              details: `An offset of ${offset} was requested, but there are only ${remaining} rows.`,
+              hint: null,
+            }),
+          )
+        }
         const rows =
           offset >= remaining
             ? []

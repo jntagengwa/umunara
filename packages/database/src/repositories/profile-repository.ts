@@ -21,13 +21,23 @@ export class ProfileRepository {
 
   async listPending(query: PageQuery): Promise<PaginatedResult<ProfileRow>> {
     const { from, to } = getPageRange(query)
-    const { data, error, count } = await this.client
+    const { data, error, count, status } = await this.client
       .from('profiles')
       .select('*', { count: 'exact' })
       .eq('role', 'pending')
       .order('created_at')
       .order('id')
       .range(from, to)
+    if (status === 416 && error?.code === 'PGRST103' && from > 0) {
+      // PostgREST's error response loses its count in the SDK. Recount with the same RLS/filter.
+      const result = await this.client
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'pending')
+      if (result.error) throw new RepositoryError(result.error.code)
+      if (result.count === null) throw new RepositoryError('MISSING_COUNT')
+      return toPaginatedResult<ProfileRow>([], result.count, query)
+    }
     if (error) throw new RepositoryError(error.code)
     return toPaginatedResult(data, count, query)
   }

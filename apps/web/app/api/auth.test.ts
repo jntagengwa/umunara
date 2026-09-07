@@ -6,6 +6,7 @@ import { POST as signOut } from './v1/auth/sign-out/route'
 import { GET as confirm } from './v1/auth/confirm/route'
 
 vi.mock('server-only', () => ({}))
+vi.mock('../../lib/auth-rate-limit', () => ({ requireAuthRateLimit: vi.fn() }))
 vi.mock('next/cache', () => ({ updateTag: vi.fn(), revalidateTag: vi.fn() }))
 const jar = vi.hoisted(() => new Map<string, string>())
 vi.mock('next/headers', () => ({
