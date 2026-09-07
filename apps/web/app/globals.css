@@ -228,6 +228,7 @@ button:focus-visible {
   padding: 1.5rem;
 }
 .content-form input,
+.content-form select,
 .content-form textarea {
   font: inherit;
   width: 100%;

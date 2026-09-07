@@ -2,6 +2,9 @@
 const originalFetch = globalThis.fetch
 globalThis.fetch = (input, init) => {
   const url = new URL(input instanceof Request ? input.url : String(input))
+  if (url.origin === 'https://api.stripe.com') {
+    return originalFetch('http://127.0.0.1:55431/__test/stripe' + url.pathname + url.search, init)
+  }
   if (
     url.origin === 'https://umunara-e2e.vercel.app' &&
     url.pathname.startsWith('/.well-known/vercel/rate-limit-api/')

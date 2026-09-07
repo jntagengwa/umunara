@@ -1,4 +1,5 @@
 import { DonateButton } from '../../../components/donate-button'
+import { StripeDonationForm } from '../../../features/donations/stripe-donation-form'
 
 export default function GivePage() {
   return (
@@ -27,6 +28,7 @@ export default function GivePage() {
         <strong>EVERY PENNY OF YOUR DONATION GOES TO THE WORK OF GOD</strong>
       </p>
       <DonateButton />
+      <StripeDonationForm />
     </main>
   )
 }
