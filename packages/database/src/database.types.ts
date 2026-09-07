@@ -1,3 +1,5 @@
+import type { DonationRow, DonationEventRow, DonationAdjustmentRow } from './donation.types'
+
 export type Json =
   | string
   | number
@@ -9,6 +11,9 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      donations: Table<DonationRow, never, never>
+      donation_events: Table<DonationEventRow, never, never>
+      donation_adjustments: Table<DonationAdjustmentRow, never, never>
       audit_log: Table<AuditLogRow, AuditLogInsert, AuditLogUpdate>
       categories: Table<CategoryRow, CategoryInsert, CategoryUpdate>
       event_registrations: Table<EventRegistrationRow, EventRegistrationInsert, EventRegistrationUpdate>
@@ -21,6 +26,10 @@ export interface Database {
     }
     Views: Record<string, never>
     Functions: {
+      ingest_donation_event: {
+        Args: { event_input: Json }
+        Returns: Json
+      }
       register_for_event: {
         Args: { target_event_id: string }
         Returns: EventRegistrationRow

@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit --strict --skipLibCheck --target ES2022 --module esnext --moduleResolution bundler src/*.ts src/repositories/*.ts"
   },
   "dependencies": {
+    "@umunara/schemas": "0.1.0",
     "@supabase/ssr": "0.6.1",
     "@supabase/supabase-js": "2.49.1"
   },

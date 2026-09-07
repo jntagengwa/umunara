@@ -1,5 +1,6 @@
 import 'server-only'
 export { AuthRepository } from './auth-repository'
+export { DonationRepository } from './donation-repository'
 export { AuditRepository } from './audit-repository'
 export { PostRepository } from './post-repository'
 export { EventRepository } from './event-repository'
