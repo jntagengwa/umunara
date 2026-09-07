@@ -1,5 +1,6 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { createAdminClient } from '../admin'
 import type { Database, ResourceRow } from '../database.types'
 import { getPageRange, toPaginatedResult, type PageQuery, type PaginatedResult } from './pagination'
 import { RepositoryError } from './result'
@@ -32,8 +33,10 @@ export class ResourceRepository {
   }
 
   async sign(path: string, expiresIn: number): Promise<string> {
-    const { data, error } = await this.client.storage
-      .from('resources')
+    // Only the authorized service supplies the stored path and short expiry.
+    // Member credentials cannot read or sign this private bucket directly.
+    const { data, error } = await createAdminClient()
+      .storage.from('resources')
       .createSignedUrl(path, expiresIn, { download: true })
     if (error || !data) throw new Error('Unable to create a resource download URL.')
     return data.signedUrl

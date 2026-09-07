@@ -10,6 +10,7 @@ vi.mock('server-only', () => ({}))
 vi.mock('next/cache', () => ({ updateTag: vi.fn(), revalidateTag: vi.fn() }))
 const state = vi.hoisted(() => ({
   client: undefined as unknown,
+  adminClient: undefined as unknown,
   role: 'member',
   signed: false,
   rpc: false,
@@ -17,7 +18,7 @@ const state = vi.hoisted(() => ({
   auditError: false,
 }))
 vi.mock('@umunara/database/server', () => ({ createServerClient: async () => state.client }))
-vi.mock('@umunara/database/admin', () => ({ createAdminClient: () => state.client }))
+vi.mock('@umunara/database/admin', () => ({ createAdminClient: () => state.adminClient }))
 const id = '11111111-1111-4111-8111-111111111111'
 const targetId = '22222222-2222-4222-8222-222222222222'
 const context = { params: Promise.resolve({ id: targetId }) }
@@ -28,59 +29,70 @@ beforeEach(() => {
   state.rpc = false
   state.approved = false
   state.auditError = false
+  const fetch: typeof globalThis.fetch = async (input, init) => {
+    const url = new URL(String(input))
+    let data: unknown = null
+    if (url.pathname.endsWith('/audit_log') && state.auditError) {
+      return Response.json({ code: 'XX000', message: 'private audit detail' }, { status: 500 })
+    }
+    if (url.pathname.endsWith('/profiles')) {
+      if (init?.method === 'PATCH') {
+        expect(url.searchParams.get('role')).toBe('eq.pending')
+        expect(url.searchParams.get('id')).toBe(`eq.${targetId}`)
+        state.approved = true
+        data = {
+          id: targetId,
+          role: 'member',
+          approved_at: '2026-09-07',
+          full_name: 'Member',
+          email: 'member@example.test',
+        }
+      } else
+        data = {
+          id,
+          role: state.role,
+          approved_at: state.role === 'pending' ? null : '2026-09-01',
+        }
+    } else if (url.pathname.endsWith('/resources')) {
+      expect(new Headers(init?.headers).get('Authorization')).toBe('Bearer test-token')
+      data = {
+        id: targetId,
+        storage_path: 'guide.pdf',
+        status: 'published',
+        visibility: 'member',
+      }
+    } else if (url.pathname === '/storage/v1/object/sign/resources/guide.pdf') {
+      if (new Headers(init?.headers).get('Authorization') !== 'Bearer service-token') {
+        return Response.json(
+          { message: 'Object not found', statusCode: '404', error: 'not_found' },
+          { status: 400 },
+        )
+      }
+      expect(JSON.parse(String(init?.body)).expiresIn).toBe(60)
+      state.signed = true
+      data = { signedURL: '/object/sign/resources/guide.pdf?token=private' }
+    } else if (url.pathname.endsWith('/rpc/register_for_event')) {
+      expect(JSON.parse(String(init?.body))).toEqual({ target_event_id: targetId })
+      state.rpc = true
+      data = {
+        id: targetId,
+        event_id: targetId,
+        profile_id: id,
+        status: 'registered',
+        registered_at: '2026-09-07',
+      }
+    }
+    return Response.json(data)
+  }
   state.client = createClient<Database>('http://supabase.test', 'test-key', {
     auth: { persistSession: false, autoRefreshToken: false },
     accessToken: async () => 'test-token',
-    global: {
-      fetch: async (input, init) => {
-        const url = new URL(String(input))
-        let data: unknown = null
-        if (url.pathname.endsWith('/audit_log') && state.auditError) {
-          return Response.json({ code: 'XX000', message: 'private audit detail' }, { status: 500 })
-        }
-        if (url.pathname.endsWith('/profiles')) {
-          if (init?.method === 'PATCH') {
-            expect(url.searchParams.get('role')).toBe('eq.pending')
-            expect(url.searchParams.get('id')).toBe(`eq.${targetId}`)
-            state.approved = true
-            data = {
-              id: targetId,
-              role: 'member',
-              approved_at: '2026-09-07',
-              full_name: 'Member',
-              email: 'member@example.test',
-            }
-          } else
-            data = {
-              id,
-              role: state.role,
-              approved_at: state.role === 'pending' ? null : '2026-09-01',
-            }
-        } else if (url.pathname.endsWith('/resources')) {
-          data = {
-            id: targetId,
-            storage_path: 'guide.pdf',
-            status: 'published',
-            visibility: 'member',
-          }
-        } else if (url.pathname === '/storage/v1/object/sign/resources/guide.pdf') {
-          expect(JSON.parse(String(init?.body)).expiresIn).toBe(60)
-          state.signed = true
-          data = { signedURL: '/object/sign/resources/guide.pdf?token=private' }
-        } else if (url.pathname.endsWith('/rpc/register_for_event')) {
-          expect(JSON.parse(String(init?.body))).toEqual({ target_event_id: targetId })
-          state.rpc = true
-          data = {
-            id: targetId,
-            event_id: targetId,
-            profile_id: id,
-            status: 'registered',
-            registered_at: '2026-09-07',
-          }
-        }
-        return Response.json(data)
-      },
-    },
+    global: { fetch },
+  })
+  state.adminClient = createClient<Database>('http://supabase.test', 'service-key', {
+    auth: { persistSession: false, autoRefreshToken: false },
+    accessToken: async () => 'service-token',
+    global: { fetch },
   })
   Object.defineProperty(state.client, 'auth', {
     value: {

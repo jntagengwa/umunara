@@ -77,7 +77,7 @@ $$;
 
 grant execute on all functions in schema tests to anon, authenticated, service_role;
 
-select plan(43);
+select plan(48);
 
 select is(
   (
@@ -302,21 +302,27 @@ insert into storage.objects (bucket_id, name) values
   ('resources', 'resources/member.pdf'),
   ('resources', 'resources/unpublished.pdf');
 select is((select public from storage.buckets where id = 'resources'), false, 'resource bucket is private');
+select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[2::bigint], 'server service role can access private resources for controlled signing');
 select tests.authenticate_as('pending@example.com');
 select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[0::bigint], 'pending users cannot read private storage');
 select tests.authenticate_as('member@example.com');
-select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[1::bigint], 'members only read storage linked to a published resource');
+select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[0::bigint], 'members cannot bypass the route with direct storage reads or signing');
+select tests.authenticate_as('editor@example.com');
+select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[0::bigint], 'editors cannot directly read or sign private resources');
 
 select tests.authenticate_as('admin@example.com');
+select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[0::bigint], 'admin sessions also use route-controlled signing');
 update public.profiles set role = 'member', approved_at = now()
 where id = tests.get_supabase_uid('pending@example.com') and role = 'pending';
 select tests.authenticate_as('pending@example.com');
-select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[1::bigint], 'approval takes effect with the same identity claims');
+select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[0::bigint], 'approval does not grant direct storage signing');
+select results_eq($$select count(*) from public.resources$$, array[2::bigint], 'approval makes member resource metadata visible with the same identity claims');
 select tests.authenticate_as('admin@example.com');
 update public.profiles set role = 'pending', approved_at = null
 where id = tests.get_supabase_uid('pending@example.com');
 select tests.authenticate_as('pending@example.com');
 select results_eq($$select count(*) from storage.objects where bucket_id = 'resources'$$, array[0::bigint], 'revocation takes effect without refreshing JWT role claims');
+select results_eq($$select count(*) from public.resources$$, array[1::bigint], 'revocation hides member resources without refreshing JWT role claims');
 select tests.clear_authentication();
 select throws_ok(
   $$ select public.register_for_event('66666666-6666-4666-8666-666666666666') $$,

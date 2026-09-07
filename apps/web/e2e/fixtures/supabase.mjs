@@ -129,6 +129,12 @@ const server = createServer(async (request, response) => {
     return response.end(JSON.stringify(url.searchParams.has('id') ? resource : [resource]))
   }
   if (url.pathname === '/storage/v1/object/sign/resources/guide.pdf') {
+    if (request.headers.authorization !== 'Bearer local-test-service-key') {
+      response.statusCode = 400
+      return response.end(
+        JSON.stringify({ message: 'Object not found', statusCode: '404', error: 'not_found' }),
+      )
+    }
     return response.end(
       JSON.stringify({ signedURL: '/object/sign/resources/guide.pdf?token=short-lived-test' }),
     )

@@ -55,3 +55,26 @@ node scripts/test-event-capacity.mjs postgresql://postgres:postgres@127.0.0.1:55
 - Previously issued bearer download URLs remain usable until their 60-second expiry; approval revocation blocks new signing immediately. This is normal signed-URL behavior.
 - All requested check categories ran. Browser tests use the external-service fixture; pgTAP, contention testing, and the additional Storage/RPC smoke test exercised the real isolated Supabase stack. No remote deployment was performed.
 - Existing toolchain warnings remain (Vite CJS deprecation, Node `punycode`, Playwright color environment); checks exited successfully.
+
+## Review fix round 1 — Server-only resource signing
+
+This correction supersedes the authenticated-Storage-client signing design described above. Storage `SELECT` also authorizes direct `createSignedUrl` calls with caller-selected expiry, so allowing members to select objects bypassed the route's 60-second cap.
+
+- Added `20260907212133_server_only_resource_signing.sql`, which drops the member resource-object read policy. The previously applied Task 6 migration and all earlier migrations remain unchanged.
+- `ResourceRepository` still reads resource metadata with the authenticated, RLS-scoped client. After `ResourceService` checks current membership and published visibility, signing uses `createAdminClient()` from the server-only database module. Only the route-controlled 60-second expiry and stored resource path reach signing; browser/session credentials cannot sign or directly download resource objects.
+- Strengthened HTTP integration coverage with distinct member/server clients: resource metadata requests require member credentials, while Storage signing succeeds only with service credentials. The existing pending-user, no-store, and saved-approval audit-failure checks remain intact. The browser fixture now enforces server credentials for signing too.
+- Updated pgTAP coverage to deny direct resource Storage access for pending/member/editor/admin sessions, retain service-role access, and verify approval/revocation through member resource metadata. All 48 checks pass.
+- Added `scripts/test-resource-download.mjs`. It starts the built application on an unused loopback port against the supplied isolated Supabase workdir, creates temporary user/resource/file fixtures, verifies direct download plus 60-second and 24-hour member signing attempts fail, verifies the actual API route returns `no-store` and a token with `exp - iat = 60`, downloads the correct file bytes, and verifies pending/draft/revoked denial. It cleans up its app process and temporary records/file.
+
+Red evidence: the strengthened route test failed with 500 instead of 200 when the old implementation attempted member-credential signing; four new Storage pgTAP expectations failed because those sessions could still select resource objects. Both passed after the code change and additive migration.
+
+Verification after the correction:
+
+- Focused member route/service tests: 5 + 9 passed.
+- Full `npm run typecheck`, `npm run lint`, `npm test` (69 tests), and `npm run build`: passed.
+- `npx playwright test`: all 4 passed.
+- pgTAP: 48 passed; database lint and security advisors: no issues.
+- Formatting, script syntax, and `git diff --check`: passed.
+- Real app/Storage smoke: passed using `node scripts/test-resource-download.mjs /private/tmp/umunara-core-platform-task3.Lch2gq`. Its first attempt encountered an occupied fixed test port; the script now selects an unused port, and the rerun passed without touching the other process.
+
+Deploy both additive Task 6 migrations before using the routes. Removing Storage access blocks new member-minted URLs; it does not revoke previously issued URLs, which retain their original expiry (including any longer-lived URL minted before this correction). Only the isolated test stack was changed, and no remote deployment occurred. The server service-role key remains required and server-only.
