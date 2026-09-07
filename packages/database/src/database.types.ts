@@ -20,7 +20,12 @@ export interface Database {
       site_settings: Table<SiteSettingRow, SiteSettingInsert, SiteSettingUpdate>
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      register_for_event: {
+        Args: { target_event_id: string }
+        Returns: EventRegistrationRow
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }

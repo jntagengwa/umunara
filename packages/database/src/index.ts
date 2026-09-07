@@ -6,6 +6,7 @@ export type { PaginatedResult, PageQuery } from './repositories/pagination'
 export type {
   Database,
   EventRow,
+  EventRegistrationRow,
   Json,
   PostRow,
   PostInsert,

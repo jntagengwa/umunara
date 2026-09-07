@@ -2,6 +2,8 @@ import { ApiError } from '@umunara/api'
 import { RepositoryError } from '@umunara/database/repositories'
 import { ZodError } from 'zod'
 
+const privateHeaders = { 'Cache-Control': 'private, no-store' }
+
 export async function jsonResponse(
   operation: () => Promise<unknown>,
   status = 200,
@@ -9,7 +11,7 @@ export async function jsonResponse(
   try {
     return Response.json(await operation(), {
       status,
-      headers: { 'Cache-Control': 'private, no-store' },
+      headers: privateHeaders,
     })
   } catch (error) {
     if (error instanceof ZodError) {
@@ -18,18 +20,30 @@ export async function jsonResponse(
           error: 'Invalid request.',
           issues: error.issues.map(({ path, message }) => ({ path, message })),
         },
-        { status: 400 },
+        { status: 400, headers: privateHeaders },
       )
     }
     if (error instanceof ApiError)
-      return Response.json({ error: error.message }, { status: error.status })
+      return Response.json(
+        { error: error.message },
+        { status: error.status, headers: privateHeaders },
+      )
     if (error instanceof RepositoryError) {
       if (error.code === 'PGRST116')
-        return Response.json({ error: 'Record not found.' }, { status: 404 })
+        return Response.json(
+          { error: 'Record not found.' },
+          { status: 404, headers: privateHeaders },
+        )
       if (error.code === '23505')
-        return Response.json({ error: 'A record with that value already exists.' }, { status: 409 })
+        return Response.json(
+          { error: 'A record with that value already exists.' },
+          { status: 409, headers: privateHeaders },
+        )
       if (error.code === '42501')
-        return Response.json({ error: 'Permission denied.' }, { status: 403 })
+        return Response.json(
+          { error: 'Permission denied.' },
+          { status: 403, headers: privateHeaders },
+        )
     }
     console.error(
       JSON.stringify({
@@ -37,7 +51,10 @@ export async function jsonResponse(
         errorType: error instanceof Error ? error.name : 'unknown',
       }),
     )
-    return Response.json({ error: 'Unable to complete the request.' }, { status: 500 })
+    return Response.json(
+      { error: 'Unable to complete the request.' },
+      { status: 500, headers: privateHeaders },
+    )
   }
 }
 

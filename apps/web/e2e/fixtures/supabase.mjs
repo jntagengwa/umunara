@@ -4,6 +4,8 @@ import { createServer } from 'node:http'
 let hero = null
 let requests = []
 const id = '11111111-1111-4111-8111-111111111111'
+const pendingId = '22222222-2222-4222-8222-222222222222'
+let approved = false
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1:55431')
   response.setHeader('Content-Type', 'application/json')
@@ -18,16 +20,20 @@ const server = createServer(async (request, response) => {
   const body = input ? JSON.parse(input) : null
   requests.push({ path: url.pathname, query: url.search, method: request.method })
   let role = 'pending'
+  let userId = id
   try {
     const token = request.headers.authorization?.slice('Bearer '.length)
-    role = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()).testRole
+    const claims = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString())
+    role = claims.testRole
+    userId = claims.sub
+    if (userId === pendingId && approved) role = 'member'
   } catch {
     /* Anonymous/public and service keys are intentionally not session tokens. */
   }
   if (url.pathname === '/auth/v1/user') {
     return response.end(
       JSON.stringify({
-        id,
+        id: userId,
         email: 'member@example.test',
         email_confirmed_at: '2026-01-01',
         app_metadata: {},
@@ -36,8 +42,31 @@ const server = createServer(async (request, response) => {
     )
   }
   if (url.pathname === '/rest/v1/profiles') {
+    const pendingProfile = {
+      id: pendingId,
+      role: approved ? 'member' : 'pending',
+      approved_at: approved ? '2026-09-07' : null,
+      full_name: 'New member',
+      email: 'new@example.test',
+      created_at: '2026-09-01',
+      updated_at: '2026-09-07',
+    }
+    if (request.method === 'PATCH') {
+      if (role !== 'admin' || url.searchParams.get('role') !== 'eq.pending') {
+        response.statusCode = 403
+        return response.end(JSON.stringify({ code: '42501' }))
+      }
+      approved = true
+      return response.end(
+        JSON.stringify({ ...pendingProfile, role: 'member', approved_at: '2026-09-07' }),
+      )
+    }
+    if (url.searchParams.get('role') === 'eq.pending') {
+      response.setHeader('Content-Range', approved ? '*/0' : '0-0/1')
+      return response.end(JSON.stringify(approved ? [] : [pendingProfile]))
+    }
     return response.end(
-      JSON.stringify({ id, role, approved_at: role === 'pending' ? null : '2026-01-01' }),
+      JSON.stringify({ id: userId, role, approved_at: role === 'pending' ? null : '2026-01-01' }),
     )
   }
   if (url.pathname === '/rest/v1/site_settings') {
@@ -70,11 +99,12 @@ const server = createServer(async (request, response) => {
     )
   }
   if (url.pathname === '/rest/v1/events') {
+    const member = url.searchParams.get('visibility') === 'eq.member'
     return response.end(
       JSON.stringify([
         {
           id,
-          title: 'Friday prayer',
+          title: member ? 'Member prayer gathering' : 'Friday prayer',
           description: 'Join our community.',
           starts_at: '2026-09-11T22:00:00Z',
           ends_at: null,
@@ -82,9 +112,36 @@ const server = createServer(async (request, response) => {
           online_url: null,
           capacity: null,
           status: 'published',
-          visibility: 'public',
+          visibility: member ? 'member' : 'public',
         },
       ]),
+    )
+  }
+  if (url.pathname === '/rest/v1/resources') {
+    const resource = {
+      id: pendingId,
+      title: 'Member prayer guide',
+      description: 'A guide for members.',
+      storage_path: 'guide.pdf',
+      status: 'published',
+      visibility: 'member',
+    }
+    return response.end(JSON.stringify(url.searchParams.has('id') ? resource : [resource]))
+  }
+  if (url.pathname === '/storage/v1/object/sign/resources/guide.pdf') {
+    return response.end(
+      JSON.stringify({ signedURL: '/object/sign/resources/guide.pdf?token=short-lived-test' }),
+    )
+  }
+  if (url.pathname === '/rest/v1/rpc/register_for_event') {
+    return response.end(
+      JSON.stringify({
+        id,
+        event_id: body.target_event_id,
+        profile_id: userId,
+        status: 'registered',
+        registered_at: '2026-09-07',
+      }),
     )
   }
   response.statusCode = 404
