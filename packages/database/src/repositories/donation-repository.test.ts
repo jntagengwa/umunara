@@ -26,6 +26,22 @@ function fixture(body: unknown, status = 200) {
 }
 
 describe('donation repository', () => {
+  it('loads only the requested PayPal gift through the server repository and validates its snapshot', async () => {
+    const { repository, fetch } = fixture({ id: result.donationId, provider_reference: 'CAPTURE123',
+      last_event_at: '2026-10-02T12:01:00+00:00', received_at: '2026-10-02T12:00:00+00:00', donor_profile_id: null,
+      gross_amount_minor: 2500, fee_amount_minor: 100, refunded_amount_minor: 500, net_amount_minor: 1900,
+      currency: 'USD', status: 'succeeded', cadence: 'one_time' })
+    expect(await repository.findPayPalDonation('CAPTURE123')).toMatchObject({ provider: 'paypal', providerReference: 'CAPTURE123', receivedAt: '2026-10-02T12:00:00.000Z', donation: { netAmountMinor: 1900 } })
+    const url = new URL(String(fetch.mock.calls[0]?.[0]))
+    expect(url.searchParams.get('provider')).toBe('eq.paypal')
+    expect(url.searchParams.get('provider_reference')).toBe('eq.CAPTURE123')
+    expect(fetch.mock.calls[0]?.[1]?.method).toBe('GET')
+  })
+
+  it('returns null for a missing PayPal receipt and masks repository errors', async () => {
+    expect(await fixture(null).repository.findPayPalDonation('CAPTURE123')).toBeNull()
+    await expect(fixture({ code: 'XX000', message: 'private data' }, 500).repository.findPayPalDonation('CAPTURE123')).rejects.toMatchObject({ message: 'Database operation failed.' })
+  })
   it.each(['recordEvent', 'upsertDonation'] as const)('%s sends exactly one atomic RPC', async (method) => {
     const { repository, fetch } = fixture(result)
     await expect(repository[method](event)).resolves.toEqual(result)

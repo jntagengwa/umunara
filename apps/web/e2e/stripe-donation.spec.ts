@@ -14,7 +14,7 @@ test('starts a monthly gift through the real application API and navigates to ho
   })
   await page.goto('/give')
   await page.getByLabel('Donation amount (USD)').fill('25.50')
-  await page.getByLabel('Giving frequency').selectOption('monthly')
+  await page.getByLabel('Giving frequency', { exact: true }).selectOption('monthly')
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   const response = page.waitForResponse('/api/v1/donations/stripe/checkout')
   await page.getByRole('button', { name: 'Continue to Stripe' }).click()

@@ -5,6 +5,9 @@ globalThis.fetch = (input, init) => {
   if (url.origin === 'https://api.stripe.com') {
     return originalFetch('http://127.0.0.1:55431/__test/stripe' + url.pathname + url.search, init)
   }
+  if (url.origin === 'https://api-m.sandbox.paypal.com') {
+    return originalFetch('http://127.0.0.1:55431/__test/paypal' + url.pathname + url.search, init)
+  }
   if (
     url.origin === 'https://umunara-e2e.vercel.app' &&
     url.pathname.startsWith('/.well-known/vercel/rate-limit-api/')

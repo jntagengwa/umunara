@@ -38,10 +38,8 @@ it('renders useful public content empty states', async () => {
   expect(screen.getByText('There are no scheduled events yet.')).toBeInTheDocument()
 })
 
-it('preserves the existing giving options', () => {
-  render(<GivePage />)
-  expect(
-    screen.getByRole('button', { name: 'Donate with PayPal' }).closest('form'),
-  ).toHaveAttribute('action', 'https://www.paypal.com/donate')
+it('offers integrated PayPal giving and preserves mailed giving', async () => {
+  render(await GivePage({ searchParams: Promise.resolve({}) }))
+  expect(screen.getByRole('button', { name: 'Continue to PayPal' })).toBeInTheDocument()
   expect(screen.getByText(/Sending a check or money order/)).toBeInTheDocument()
 })

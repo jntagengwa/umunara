@@ -1,7 +1,10 @@
-import { DonateButton } from '../../../components/donate-button'
+import { PayPalDonationButton } from '../../../features/donations/paypal-donation-button'
 import { StripeDonationForm } from '../../../features/donations/stripe-donation-form'
 
-export default function GivePage() {
+export default async function GivePage({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const params = await searchParams
   return (
     <main className="page-content" id="main-content">
       <h1>Donate</h1>
@@ -27,7 +30,10 @@ export default function GivePage() {
       <p>
         <strong>EVERY PENNY OF YOUR DONATION GOES TO THE WORK OF GOD</strong>
       </p>
-      <DonateButton />
+      <PayPalDonationButton
+        returnState={typeof params.paypal === 'string' ? params.paypal : undefined}
+        orderId={typeof params.token === 'string' ? params.token : undefined}
+      />
       <StripeDonationForm />
     </main>
   )
