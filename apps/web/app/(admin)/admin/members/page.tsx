@@ -14,7 +14,10 @@ export default async function MemberApprovalsPage({
   return (
     <main className="page-content" id="main-content">
       <h1>Member approvals</h1>
-      {members.data.length === 0 && <p>No members are awaiting approval.</p>}
+      {members.total === 0 && <p>No members are awaiting approval.</p>}
+      {members.data.length === 0 && members.total > 0 && (
+        <p>No members on this page. Return to a previous page to see remaining approvals.</p>
+      )}
       {members.data.map((member) => (
         <article key={member.id}>
           <h2>{member.fullName ?? member.email ?? 'New member'}</h2>

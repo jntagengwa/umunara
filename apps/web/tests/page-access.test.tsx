@@ -5,6 +5,9 @@ import MemberPage from '../app/(member)/member/page'
 import AdminContentPage from '../app/(admin)/admin/content/page'
 vi.mock('server-only', () => ({}))
 vi.mock('next/navigation', () => ({
+  redirect: (path: string) => {
+    throw new Error(`REDIRECT:${path}`)
+  },
   notFound: () => {
     throw new Error('NOT_FOUND')
   },
@@ -33,18 +36,27 @@ vi.mock('@umunara/api/context', () => ({
 }))
 vi.mock('../lib/content-reads', () => ({ readHomeHero: vi.fn(), readMemberPosts: vi.fn() }))
 beforeEach(() => {
-  Object.assign(state, { role: 'pending', authenticated: true, approved: false, verified: true })
+  Object.assign(state, {
+    role: 'pending',
+    authenticated: true,
+    approved: false,
+    verified: true,
+  })
 })
 
 it.each([
   { role: 'pending', approved: false, authenticated: true, verified: true },
   { role: 'admin', approved: false, authenticated: true, verified: true },
-  { role: 'admin', approved: true, authenticated: false, verified: true },
   { role: 'admin', approved: true, authenticated: true, verified: false },
   { role: 'unknown', approved: true, authenticated: true, verified: true },
 ])('fails closed before returning member content for $role', async (fixture) => {
   Object.assign(state, fixture)
   await expect(MemberPage()).rejects.toThrow('NOT_FOUND')
+})
+
+it('directs anonymous visitors to sign in', async () => {
+  state.authenticated = false
+  await expect(MemberPage()).rejects.toThrow('REDIRECT:/sign-in')
 })
 
 it('rejects approved members from the content CMS', async () => {

@@ -1,4 +1,5 @@
 import { createServer } from 'node:http'
+import { handleAuth } from './auth.mjs'
 
 // Loopback-only external Auth/PostgREST fixture. Application routes, services and caching stay real.
 let hero = null
@@ -6,10 +7,16 @@ let requests = []
 const id = '11111111-1111-4111-8111-111111111111'
 const pendingId = '22222222-2222-4222-8222-222222222222'
 let approved = false
+let paginatedApprovals = false
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1:55431')
   response.setHeader('Content-Type', 'application/json')
   if (url.pathname === '/health') return response.end('{}')
+  if (url.pathname === '/__test/approval-pages') {
+    paginatedApprovals = request.method === 'POST'
+    approved = false
+    return response.end('{}')
+  }
   if (url.pathname === '/__test/requests') {
     if (request.method === 'DELETE') requests = []
     return response.end(JSON.stringify(requests))
@@ -19,6 +26,7 @@ const server = createServer(async (request, response) => {
   const input = Buffer.concat(chunks).toString()
   const body = input ? JSON.parse(input) : null
   requests.push({ path: url.pathname, query: url.search, method: request.method })
+  if (handleAuth(url, body, response)) return
   let role = 'pending'
   let userId = id
   try {
@@ -62,11 +70,38 @@ const server = createServer(async (request, response) => {
       )
     }
     if (url.searchParams.get('role') === 'eq.pending') {
+      if (paginatedApprovals) {
+        const offset = Number(url.searchParams.get('offset') ?? 0)
+        const remaining = approved ? 25 : 26
+        const rows =
+          offset >= remaining
+            ? []
+            : offset >= 25
+              ? [pendingProfile]
+              : [
+                  {
+                    ...pendingProfile,
+                    id: '44444444-4444-4444-8444-444444444444',
+                    full_name: 'Earlier pending member',
+                    role: 'pending',
+                    approved_at: null,
+                  },
+                ]
+        response.setHeader(
+          'Content-Range',
+          rows.length ? `${offset}-${offset}/${remaining}` : `*/${remaining}`,
+        )
+        return response.end(JSON.stringify(rows))
+      }
       response.setHeader('Content-Range', approved ? '*/0' : '0-0/1')
       return response.end(JSON.stringify(approved ? [] : [pendingProfile]))
     }
     return response.end(
-      JSON.stringify({ id: userId, role, approved_at: role === 'pending' ? null : '2026-01-01' }),
+      JSON.stringify({
+        id: userId,
+        role,
+        approved_at: role === 'pending' ? null : '2026-01-01',
+      }),
     )
   }
   if (url.pathname === '/rest/v1/site_settings') {

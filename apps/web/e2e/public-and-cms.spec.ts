@@ -52,7 +52,8 @@ test('private routes deny anonymous and pending users, and restrict the CMS to e
 }) => {
   for (const route of ['/admin', '/admin/content', '/member']) {
     await page.goto(route)
-    await expect(page.getByRole('heading', { name: 'Page unavailable' })).toBeVisible()
+    await expect(page).toHaveURL(/\/sign-in$/)
+    await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible()
   }
   await signIn(context, 'pending')
   await page.goto('/member')

@@ -4,31 +4,13 @@ import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 import type { Database } from './database.types'
-
-function getSupabaseUrl(): string {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-
-  if (!url) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL is required.')
-  }
-
-  return url
-}
-
-function getSupabasePublicKey(): string {
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!key) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is required.')
-  }
-
-  return key
-}
+import { getServerConfig } from './server-config'
 
 export async function createServerClient() {
   const cookieStore = await cookies()
+  const { url, key } = getServerConfig()
 
-  return createSupabaseServerClient<Database>(getSupabaseUrl(), getSupabasePublicKey(), {
+  return createSupabaseServerClient<Database>(url, key, {
     cookies: {
       getAll() {
         return cookieStore.getAll()
@@ -39,7 +21,7 @@ export async function createServerClient() {
             cookieStore.set(name, value, options)
           })
         } catch {
-          // Server Components cannot write cookies; middleware refreshes sessions.
+          // Server Components are read-only. apps/web/proxy.ts persists session refreshes.
         }
       },
     },

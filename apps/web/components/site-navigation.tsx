@@ -12,6 +12,7 @@ const links = [
   ['/give', 'Donate'],
   ['/about-us', 'About Us'],
   ['/member', 'Members'],
+  ['/account', 'Account'],
 ] as const
 
 export function SiteNavigation() {
