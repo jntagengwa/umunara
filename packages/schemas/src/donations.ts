@@ -20,8 +20,8 @@ const amounts = {
 }
 
 export const normalizedDonationSchema = z.object(amounts).strict().superRefine((value, ctx) => {
-  if (value.refundedAmountMinor > value.grossAmountMinor || value.feeAmountMinor > value.grossAmountMinor) {
-    ctx.addIssue({ code: 'custom', message: 'Refunds and fees cannot exceed the gift amount.' })
+  if (value.refundedAmountMinor > value.grossAmountMinor) {
+    ctx.addIssue({ code: 'custom', message: 'Refunds cannot exceed the gift amount.' })
   }
   if (value.netAmountMinor !== value.grossAmountMinor - value.feeAmountMinor - value.refundedAmountMinor) {
     ctx.addIssue({ code: 'custom', message: 'Net amount must equal gross less fees and refunds.' })
@@ -56,11 +56,15 @@ export const donationEventSchema = z.object({
   provider: donationProviderSchema,
   providerEventId: z.string().trim().min(1).max(255),
   providerReference: z.string().trim().min(1).max(255),
+  correctsProviderEventId: z.string().trim().min(1).max(255).nullable().default(null),
   occurredAt: z.string().datetime({ offset: true }),
   receivedAt: z.string().datetime({ offset: true }),
   donorProfileId: z.string().uuid().nullable().default(null),
   donation: normalizedDonationSchema,
 }).strict().refine((value) => value.provider === value.donation.provider, 'Provider must match the donation.')
+  .refine((value) => value.correctsProviderEventId === null || (
+    value.correctsProviderEventId !== value.providerEventId && value.donation.status === 'succeeded'
+  ), 'A correction must reference another event and reinstate succeeded funds.')
 
 export const donationEventResultSchema = z.object({
   outcome: z.enum(['applied', 'duplicate', 'stale']),

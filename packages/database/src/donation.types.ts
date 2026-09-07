@@ -20,6 +20,7 @@ export interface DonationRow {
 
 export interface DonationEventRow {
   id: string
+  corrects_event_id: string | null
   donation_id: string
   provider: DonationProvider
   provider_event_id: string

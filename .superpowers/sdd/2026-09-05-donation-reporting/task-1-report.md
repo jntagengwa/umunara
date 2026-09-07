@@ -114,3 +114,45 @@ No provider, checkout, webhook, UI, live account, deployment, push, or external 
 - [SIX ISO 4217 current list](https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml), fetched directly and parsed as XML for the currency allowlist.
 
 Karpathy guidance kept changes scoped to Task 1; Supabase guidance drove current documentation checks, CLI migration creation, private privileged functions, explicit grants, and the recorded database verification gap. The requested existing worktree/branch is preserved.
+
+## Fix round 1 — fees and verified reinstatements
+
+Addressed both Important financial-model review findings in an additive migration. This section supersedes the initial blanket statement that refunds/reversals can never return to succeeded.
+
+Changed files in this round:
+
+- `supabase/migrations/20260907224440_donation_corrections.sql` (new)
+- `supabase/tests/donations_rls.test.sql`
+- `packages/schemas/src/donations.ts`
+- `packages/schemas/src/donations.test.ts`
+- `packages/database/src/donation.types.ts`
+- `packages/database/src/repositories/donation-repository.test.ts`
+- This report.
+
+The Supabase CLI created the new migration with `migration new donation_corrections`; its output reported `20260907224440_donation_corrections.sql`. All prior migrations remain unchanged. No SQL was applied to any database.
+
+Fees remain nonnegative safe integers but may exceed gross donations. Zod removes only the unsupported fee-to-gross comparison; SQL replaces the original combined fee/refund constraint with a refund-only limit and explicit safe derived-net checks. A 100-minor-unit gift reversed with a 1500-minor-unit dispute fee produces net -1500. No existing financial history is rewritten.
+
+Reinstatement is explicit, not inferred from a later ordinary success notification. The adapter supplies `correctsProviderEventId` only after verifying the provider's correction/reinstatement event. The database resolves and persists an immutable `corrects_event_id` link, with a composite foreign key requiring the target to belong to the same gift. The correction must:
+
+1. Reference an already applied event for the same provider/gift, never itself.
+2. Match the current applied snapshot's occurrence time, status, fee total, and refunded total. If multiple events have the same time and identical financial state, either represents the same current snapshot; stale events without an adjustment cannot be targets.
+3. Occur strictly after the current projection's event time.
+4. Move `refunded` or `reversed` to `succeeded`, or correct a partially refunded `succeeded` gift to `succeeded` with fewer refunded funds. The refunded total must decrease; remaining partial refunds are allowed.
+
+Original gift identity remains immutable. The ordinary event path retains the prior stale/regression checks. Invalid/missing/cross-gift references raise a safe error; obsolete or insufficiently newer corrections are retained as stale without a financial adjustment. An applied correction updates the projection and adds compensating fee/refund/net deltas in the same idempotent transaction. The original refund/reversal events and adjustments remain intact, and recognized gross is not counted again. Duplicate correction delivery returns `duplicate`, including after subsequent state changes.
+
+Verification for this round:
+
+- Red contract run: `npm test --workspace @umunara/schemas -- donations.test.ts` exited 1 with `Tests 2 failed | 20 passed (22)`. The failures were `Refunds and fees cannot exceed the gift amount.` and `Unrecognized key(s) in object: 'correctsProviderEventId'`.
+- Green focused contract run: the same command exited 0 with `Tests 22 passed (22)`.
+- Repository run: `npm test --workspace @umunara/database` exited 0 with `Tests 14 passed (14)`, including 8 donation repository tests. A test fixture initially reused a consumed Response body across calls; it now returns a fresh Response for each intercepted RPC. The reinstatement test verifies separate reversal/correction envelopes through the real client, not PostgreSQL behavior.
+- `npm run typecheck` exited 0 across all workspaces.
+- `npm run lint` plus explicit ESLint checks of changed schemas/database TypeScript files exited 0.
+- Final `npm test` exited 0: web 59, API 30, database 14, schemas 24 — 127 tests passed.
+- `npm run build` exited 0: `Compiled successfully in 364ms`, `Finished TypeScript in 2.1s`, and `Generating static pages ... (23/23) in 287ms`.
+- `git diff --check` exited 0; all changed source/test files and the complete new migration were re-read and reviewed.
+
+Added pgTAP cases cover fees exceeding gifts; reversal followed by reinstatement; compensating refund/net amounts and history preservation; duplicate reinstatement; ordinary regressive success; late reversal; equal-time/obsolete corrections; cross-gift/missing targets; full-to-partial refund correction; and partial-to-full reinstatement with total-history reconciliation. The test's admin-visible gift count increases to four because of the extra small-gift fixture.
+
+The isolated database remains unavailable. Per the fix-round instruction, no retry, wait, reset, start, or external DB operation was performed. New SQL assertions and migration execution remain unverified; rerun the exact isolated pgTAP command above once both donation migrations have been applied through an approved isolated workflow. Provider flows, UI/e2e, deployment, and external configuration remain outside this fix round.

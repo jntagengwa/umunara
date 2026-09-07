@@ -83,6 +83,37 @@ select is((select gross_delta_minor from public.donation_adjustments a join publ
 select is(public.ingest_donation_event(tests.donation_input('settled', 'pending_gift', 'succeeded', '2026-09-08T12:00:00Z')) ->> 'outcome', 'applied', 'pending gift settles');
 select is(public.ingest_donation_event(tests.donation_input('reversed', 'pending_gift', 'reversed', '2026-09-09T12:00:00Z')) ->> 'outcome', 'applied', 'reversal applies');
 
+select is(public.ingest_donation_event(jsonb_set(tests.donation_input('small_dispute', 'small_gift', 'reversed'), '{donation}',
+  '{"provider":"stripe","grossAmountMinor":100,"feeAmountMinor":1500,"refundedAmountMinor":100,"netAmountMinor":-1500,"status":"reversed","currency":"USD","cadence":"one_time"}')) ->> 'outcome',
+  'applied', 'dispute fee can exceed the reversed gift');
+select is((select net_amount_minor from public.donations where provider_reference = 'small_gift'), -1500::bigint, 'dispute fee remains in the net projection');
+select is((select sum(net_delta_minor)::bigint from public.donation_adjustments a join public.donations d on d.id = a.donation_id where d.provider_reference = 'small_gift'), -1500::bigint, 'larger dispute fee is preserved in immutable adjustments');
+
+select is(public.ingest_donation_event(tests.donation_input('unmarked_success', 'pending_gift', 'succeeded', '2026-09-10T12:00:00Z')) ->> 'outcome', 'stale', 'newer ordinary success cannot silently undo a reversal');
+select is(public.ingest_donation_event(tests.donation_input('old_correction', 'pending_gift', 'succeeded', '2026-09-09T12:00:00Z') || '{"correctsProviderEventId":"reversed"}') ->> 'outcome', 'stale', 'correction must be strictly newer than the current snapshot');
+select is(public.ingest_donation_event(tests.donation_input('won', 'pending_gift', 'succeeded', '2026-09-10T12:00:00Z') || '{"correctsProviderEventId":"reversed"}') ->> 'outcome', 'applied', 'verified reversal reinstatement applies');
+select is((select status::text from public.donations where provider_reference = 'pending_gift'), 'succeeded', 'reinstatement restores succeeded projection');
+select is((select net_amount_minor from public.donations where provider_reference = 'pending_gift'), 2400::bigint, 'reinstatement restores net giving');
+select is((select refunded_delta_minor from public.donation_adjustments a join public.donation_events e on e.id = a.event_id where e.provider_event_id = 'won'), -2500::bigint, 'reinstatement writes a compensating refund adjustment');
+select is((select net_delta_minor from public.donation_adjustments a join public.donation_events e on e.id = a.event_id where e.provider_event_id = 'won'), 2500::bigint, 'compensating adjustment reinstates funds without counting a second gross gift');
+select is((select status::text from public.donation_events where provider_event_id = 'reversed'), 'reversed', 'reinstatement preserves reversal event history');
+select ok((select corrected.provider_event_id = 'reversed' from public.donation_events correction join public.donation_events corrected on corrected.id = correction.corrects_event_id where correction.provider_event_id = 'won'), 'correction retains its immutable event reference');
+select is(public.ingest_donation_event(tests.donation_input('won', 'pending_gift', 'succeeded', '2026-09-10T12:00:00Z') || '{"correctsProviderEventId":"reversed"}') ->> 'outcome', 'duplicate', 'reinstatement replay remains idempotent');
+select is((select count(*) from public.donation_adjustments a join public.donation_events e on e.id = a.event_id where e.provider_event_id = 'won'), 1::bigint, 'duplicate reinstatement writes no extra adjustment');
+select is(public.ingest_donation_event(tests.donation_input('late_reversal', 'pending_gift', 'reversed', '2026-09-09T13:00:00Z')) ->> 'outcome', 'stale', 'delayed reversal cannot undo a newer reinstatement');
+select is(public.ingest_donation_event(tests.donation_input('obsolete_correction', 'pending_gift', 'succeeded', '2026-09-11T12:00:00Z') || '{"correctsProviderEventId":"reversed"}') ->> 'outcome', 'stale', 'obsolete correction target cannot be applied twice with different event IDs');
+select throws_ok($$select public.ingest_donation_event(tests.donation_input('wrong_gift', 'pending_gift', 'succeeded', '2026-09-11T12:00:00Z') || '{"correctsProviderEventId":"refund"}')$$,
+  '22023', 'Invalid donation correction target.', 'correction cannot target another gift');
+select throws_ok($$select public.ingest_donation_event(tests.donation_input('missing_target', 'pending_gift', 'succeeded', '2026-09-11T12:00:00Z') || '{"correctsProviderEventId":"unknown"}')$$,
+  '22023', 'Invalid donation correction target.', 'correction must target an applied event');
+
+select is(public.ingest_donation_event(jsonb_set(jsonb_set(tests.donation_input('partial_reinstatement', 'gift_1', 'succeeded', '2026-09-10T12:00:00Z'),
+  '{donation,refundedAmountMinor}', '500'), '{donation,netAmountMinor}', '1900') || '{"correctsProviderEventId":"refund"}') ->> 'outcome', 'applied', 'full refund can be explicitly corrected to a partial refund');
+select is((select refunded_amount_minor::bigint from public.donations where provider_reference = 'gift_1'), 500::bigint, 'partial reinstatement retains the remaining refund');
+select is(public.ingest_donation_event(tests.donation_input('partial_refund_correction', 'gift_1', 'succeeded', '2026-09-11T12:00:00Z') || '{"correctsProviderEventId":"partial_reinstatement"}') ->> 'outcome', 'applied', 'partial refund can be explicitly corrected to fully reinstated funds');
+select is((select sum(net_delta_minor)::bigint from public.donation_adjustments a join public.donations d on d.id = a.donation_id where d.provider_reference = 'gift_1'), 2400::bigint, 'refund corrections reconcile across the entire immutable history');
+select is((select status::text from public.donation_events where provider_event_id = 'refund'), 'refunded', 'refund correction preserves the original refunded event');
+
 reset role;
 select throws_ok($$update public.donations set gross_amount_minor = 3000$$, '22023', 'Donation identity cannot change.', 'original gift amounts cannot be rewritten');
 select throws_ok($$update public.donation_events set status = 'failed'$$, '42501', 'Donation history is immutable.', 'owner cannot rewrite events through ordinary DML');
@@ -112,7 +143,7 @@ select is((select count(*) from public.donations), 0::bigint, 'editors cannot re
 select is((select count(*) from public.donation_events), 0::bigint, 'editors cannot read events');
 select is((select count(*) from public.donation_adjustments), 0::bigint, 'editors cannot read adjustments');
 select set_config('request.jwt.claims', '{"sub":"10000000-0000-4000-8000-000000000004","role":"authenticated"}', true);
-select is((select count(*) from public.donations), 3::bigint, 'admin policy permits reading all gifts');
+select is((select count(*) from public.donations), 4::bigint, 'admin policy permits reading all gifts');
 select ok((select count(*) > 0 from public.donation_events), 'admin policy permits event reads');
 select ok((select count(*) > 0 from public.donation_adjustments), 'admin policy permits adjustment reads');
 select throws_ok($$select public.ingest_donation_event(tests.donation_input('admin'))$$, '42501', null, 'admins have no ingestion access');
