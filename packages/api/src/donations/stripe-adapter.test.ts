@@ -3,6 +3,7 @@ import StripeClient from 'stripe'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { DonationRepository } from '@umunara/database/repositories'
 import { createAdminClient } from '@umunara/database/admin'
+import { donationEventSchema, type DonationEvent } from '@umunara/schemas'
 import { StripeAdapter } from './stripe-adapter'
 import { DonationService } from './donation-service'
 
@@ -30,7 +31,7 @@ const payment = {
     amount_refunded: 0,
     currency: 'usd',
     paid: true,
-    balance_transaction: { fee: 100, currency: 'usd' },
+    balance_transaction: { fee: 100, currency: 'usd', created: created + 60 },
   },
 }
 const invoice = {
@@ -41,30 +42,40 @@ const invoice = {
   amount_paid: 2500,
   currency: 'usd',
   status: 'paid',
+  status_transitions: { paid_at: created + 60 },
   parent: {
     subscription_details: { metadata: { ...metadata, cadence: 'monthly' } },
   },
 }
 const fetcher = vi.fn<typeof fetch>()
 const invalidations: string[][] = []
-let events: Record<string, unknown>[] = []
+let events: DonationEvent[] = []
+const projections = new Map<string, DonationEvent>()
 let applied = new Set<string>()
 let checkoutBody: URLSearchParams
-let currentPayment = payment
-let currentInvoice = invoice
+type PaymentFixture = Omit<typeof payment, 'latest_charge'> & {
+  latest_charge: Omit<typeof payment.latest_charge, 'balance_transaction'> & {
+    balance_transaction?: typeof payment.latest_charge.balance_transaction | null
+  }
+}
+let currentPayment: PaymentFixture = payment
+let currentInvoice: Omit<typeof invoice, 'status_transitions'> & {
+  status_transitions: { paid_at: number | null }
+} = invoice
 let failLedger = false
 let staleLedger = false
 function signed(
   type: string,
   object: unknown,
   id = 'evt_gift',
-  timestamp = Math.floor(Date.now() / 1000)
+  timestamp = Math.floor(Date.now() / 1000),
+  occurredAt = created + 60
 ) {
   const raw = JSON.stringify({
     id,
     object: 'event',
     type,
-    created: created + 60,
+    created: occurredAt,
     livemode: false,
     api_version: '2026-08-26.dahlia',
     data: { object },
@@ -87,6 +98,7 @@ function service() {
 }
 beforeEach(() => {
   events = []
+  projections.clear()
   applied = new Set()
   invalidations.length = 0
   currentPayment = structuredClone(payment)
@@ -117,14 +129,22 @@ beforeEach(() => {
     if (url.pathname === '/rest/v1/rpc/ingest_donation_event') {
       if (failLedger)
         return Response.json({ code: 'XX000', message: 'private provider data' }, { status: 500 })
-      const { event_input: event } = JSON.parse(String(init?.body))
+      const event = donationEventSchema.parse(JSON.parse(String(init?.body)).event_input)
       events.push(event)
       const outcome = applied.has(event.providerEventId)
         ? 'duplicate'
         : staleLedger
           ? 'stale'
           : 'applied'
+      const previous = projections.get(event.providerReference)
+      if (previous && previous.receivedAt !== event.receivedAt) {
+        return Response.json(
+          { code: '22023', message: 'Donation identity cannot change.' },
+          { status: 400 }
+        )
+      }
       applied.add(event.providerEventId)
+      if (outcome === 'applied') projections.set(event.providerReference, event)
       return Response.json({ outcome, donationId: randomUUID(), eventId: randomUUID() })
     }
     throw new Error(`Unexpected fixture request: ${url.pathname}`)
@@ -144,7 +164,7 @@ it('uses one atomic ledger call per verified delivery, with only one cache inval
   expect(events).toHaveLength(2)
   expect(events[0]).toMatchObject({
     providerReference: 'pi_gift',
-    receivedAt: '2026-09-08T00:00:00.000Z',
+    receivedAt: '2026-09-08T00:01:00.000Z',
     donation: {
       grossAmountMinor: 2500,
       feeAmountMinor: 100,
@@ -206,12 +226,16 @@ it('ignores signed non-donation payments without writing a ledger row', async ()
   expect(invalidations).toEqual([])
 })
 
-it('refuses changed gift identity and missing or cross-currency fees instead of recording incorrect net giving', async () => {
+it('refuses changed gift identity and cross-currency fees instead of recording incorrect net giving', async () => {
   const event = signed('payment_intent.succeeded', { id: 'pi_gift' })
   currentPayment.amount = 3000
   await expect(service().handleStripeEvent(...event)).rejects.toMatchObject({ status: 503 })
   currentPayment.amount = 2500
-  currentPayment.latest_charge.balance_transaction.currency = 'eur'
+  currentPayment.latest_charge.balance_transaction = {
+    fee: 100,
+    currency: 'eur',
+    created: created + 60,
+  }
   await expect(service().handleStripeEvent(...event)).rejects.toMatchObject({ status: 503 })
   expect(events).toHaveLength(0)
 })
@@ -289,10 +313,106 @@ it('records failed recurring attempts without fees or recognized refunds', async
   currentInvoice.amount_paid = 0
   await service().handleStripeEvent(...signed('invoice.payment_failed', { id: 'in_gift' }))
   expect(events[0]).toMatchObject({
-    providerReference: 'in_gift',
+    providerReference: 'unsettled:in_gift',
     donation: { status: 'failed', feeAmountMinor: 0 },
   })
 })
+
+it.each(['one_time', 'monthly'] as const)(
+  'attributes %s September failures paid October 2 to October without changing an immutable receipt',
+  async (cadence) => {
+    const recurring = cadence === 'monthly'
+    const reference = recurring ? 'in_gift' : 'pi_gift'
+    const failureType = recurring ? 'invoice.payment_failed' : 'payment_intent.payment_failed'
+    const successType = recurring ? 'invoice.payment_succeeded' : 'payment_intent.succeeded'
+    const settled = Date.parse('2026-10-02T12:00:00Z') / 1000
+    currentPayment.status = 'requires_payment_method'
+    currentInvoice.status = 'open'
+    currentInvoice.amount_paid = 0
+    const app = service()
+    await app.handleStripeEvent(...signed(failureType, { id: reference }, 'evt_failure'))
+    expect(projections.get(`unsettled:${reference}`)).toMatchObject({
+      receivedAt: '2026-09-08T00:00:00.000Z',
+      donation: { status: 'failed', feeAmountMinor: 0 },
+    })
+    currentPayment.status = 'succeeded'
+    currentPayment.latest_charge.balance_transaction = {
+      fee: 100,
+      currency: 'usd',
+      created: recurring ? settled - 60 : settled,
+    }
+    currentInvoice.status = 'paid'
+    currentInvoice.amount_paid = 2500
+    currentInvoice.status_transitions.paid_at = settled
+    invalidations.length = 0
+    await app.handleStripeEvent(
+      ...signed(successType, { id: reference }, 'evt_settled', undefined, settled)
+    )
+    await app.handleStripeEvent(
+      ...signed(successType, { id: reference }, 'evt_settled', undefined, settled)
+    )
+    expect(projections.get(reference)).toMatchObject({
+      receivedAt: '2026-10-02T12:00:00.000Z',
+      donation: { status: 'succeeded', grossAmountMinor: 2500 },
+    })
+    expect(invalidations).toEqual([['donations:summary:2026-10']])
+    expect(projections.size).toBe(2)
+    const recognized = [...projections.values()].filter(
+      (event) => event.donation.status === 'succeeded'
+    )
+    expect(recognized.reduce((sum, event) => sum + event.donation.grossAmountMinor, 0)).toBe(2500)
+    currentPayment.latest_charge.amount_refunded = 500
+    if (recurring) currentPayment.metadata = { ...metadata, purpose: '' }
+    await app.handleStripeEvent(
+      ...signed(
+        'charge.refunded',
+        { payment_intent: 'pi_gift' },
+        'evt_refund',
+        undefined,
+        settled + 120
+      )
+    )
+    expect(projections.get(reference)).toMatchObject({
+      receivedAt: '2026-10-02T12:00:00.000Z',
+      donation: { refundedAmountMinor: 500, netAmountMinor: 1900 },
+    })
+  }
+)
+
+it('refuses a paid invoice without its settlement timestamp instead of falling back to creation', async () => {
+  currentInvoice.status_transitions.paid_at = null
+  await expect(
+    service().handleStripeEvent(...signed('invoice.payment_succeeded', { id: 'in_gift' }))
+  ).rejects.toMatchObject({ status: 503 })
+  expect(events).toEqual([])
+  expect(invalidations).toEqual([])
+})
+
+it.each([null, undefined])(
+  'retries a settled payment with %s balance transaction before ledger writes, then applies fees once',
+  async (balance) => {
+    currentPayment.latest_charge.balance_transaction = balance
+    const event = signed('payment_intent.succeeded', { id: 'pi_gift' })
+    const app = service()
+    await expect(app.handleStripeEvent(...event)).rejects.toMatchObject({
+      status: 503,
+      message: 'Unable to process Stripe webhook. Please retry later.',
+    })
+    expect(events).toEqual([])
+    expect(invalidations).toEqual([])
+    currentPayment.latest_charge.balance_transaction = {
+      fee: 100,
+      currency: 'usd',
+      created: created + 60,
+    }
+    await app.handleStripeEvent(...event)
+    await app.handleStripeEvent(...event)
+    expect(applied.size).toBe(1)
+    expect(projections.size).toBe(1)
+    expect(projections.get('pi_gift')?.donation.netAmountMinor).toBe(2400)
+    expect(invalidations).toEqual([['donations:summary:2026-09']])
+  }
+)
 
 it('propagates ledger failure for provider retry without invalidating cache', async () => {
   failLedger = true

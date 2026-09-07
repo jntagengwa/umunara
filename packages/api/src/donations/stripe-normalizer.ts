@@ -19,7 +19,7 @@ export class StripeNormalizer {
     this.checkAmount(metadata, payment.amount, payment.currency)
     return this.snapshot(
       payment.id,
-      payment.created,
+      payment.status === 'succeeded' ? undefined : payment.created,
       metadata,
       payment.status === 'succeeded'
         ? 'succeeded'
@@ -63,7 +63,10 @@ export class StripeNormalizer {
     )
     this.checkAmount(metadata, payment.amount, payment.currency)
     if (payment.status !== 'succeeded') throw new Error('Invoice payment is not settled.')
-    return this.snapshot(invoice.id, invoice.created, metadata, 'succeeded', payment)
+    const paidAt = invoice.status_transitions.paid_at
+    if (!Number.isSafeInteger(paidAt) || !paidAt || paidAt < 0)
+      throw new Error('Missing invoice settlement time.')
+    return this.snapshot(invoice.id, paidAt, metadata, 'succeeded', payment)
   }
 
   async refund(paymentId: string): Promise<GiftSnapshot | null> {
@@ -91,7 +94,7 @@ export class StripeNormalizer {
 
   private snapshot(
     reference: string,
-    created: number,
+    receivedTimestamp: number | undefined,
     metadata: NonNullable<ReturnType<typeof readDonationMetadata>>,
     status: 'pending' | 'failed' | 'succeeded',
     payment?: StripeClient.PaymentIntent
@@ -112,10 +115,17 @@ export class StripeNormalizer {
       }
       feeAmountMinor = balance.fee
       refundedAmountMinor = charge.amount_refunded
+      // The charge's balance transaction records receipt of the one-time
+      // payment. available_on is its later payout availability, not receipt.
+      receivedTimestamp ??= balance.created
     }
+    if (!Number.isSafeInteger(receivedTimestamp) || !receivedTimestamp || receivedTimestamp < 0)
+      throw new Error('Missing donation receipt time.')
     return {
-      providerReference: reference,
-      receivedAt: new Date(created * 1000).toISOString(),
+      // Unsettled attempts remain an auditable zero-recognized projection.
+      // Only settlement reserves the canonical gift and its immutable date.
+      providerReference: status === 'succeeded' ? reference : `unsettled:${reference}`,
+      receivedAt: new Date(receivedTimestamp * 1000).toISOString(),
       donation: normalizeDonation({
         provider: 'stripe',
         amountMinor: metadata.amount_minor,

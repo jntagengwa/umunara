@@ -50,7 +50,7 @@ export async function handleStripeFixture(request, response, url) {
           id: 'ch_fixture',
           paid: true,
           amount_refunded: 0,
-          balance_transaction: { fee: 100, currency: 'usd' },
+          balance_transaction: { fee: 100, currency: 'usd', created: 1788825660 },
         },
       })
     )
