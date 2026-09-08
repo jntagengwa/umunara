@@ -1,5 +1,6 @@
 import 'server-only'
 export { BankRepository } from './bank-repository'
+export { BankSyncRepository } from './bank-sync-repository'
 export { ReconciliationRepository } from './reconciliation-repository'
 export { AuthRepository } from './auth-repository'
 export { DonationRepository } from './donation-repository'

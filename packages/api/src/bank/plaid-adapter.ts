@@ -3,6 +3,11 @@ import { z } from 'zod'
 import { bankConnectionAccountSchema, type BankConnectionAccount } from '@umunara/schemas'
 import { ApiError } from '../errors'
 import type { BankProvider } from './bank-connection-service'
+import {
+  PlaidSyncError,
+  plaidSyncResponseSchema,
+  type PlaidSyncResponse,
+} from './plaid-sync-contracts'
 
 const identifier = z.string().min(1).max(255)
 const accountsResponse = z.object({
@@ -55,9 +60,25 @@ export class PlaidAdapter implements BankProvider {
         redirect: 'error',
         signal: AbortSignal.timeout(10_000),
       })
-      if (!response.ok) throw new Error('Provider unavailable.')
+      if (!response.ok) {
+        if (path === '/transactions/sync') {
+          const error = z.object({ error_code: z.string() }).safeParse(await response.json())
+          const code = error.success ? error.data.error_code : ''
+          throw new PlaidSyncError(
+            code === 'TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION'
+              ? 'restart'
+              : code === 'ITEM_LOGIN_REQUIRED'
+                ? 'reauthorization_required'
+                : ['INVALID_ACCESS_TOKEN', 'ITEM_NOT_FOUND', 'ITEM_NOT_SUPPORTED'].includes(code)
+                  ? 'disconnected'
+                  : 'unavailable'
+          )
+        }
+        throw new Error('Provider unavailable.')
+      }
       return await response.json()
-    } catch {
+    } catch (error) {
+      if (error instanceof PlaidSyncError) throw error
       throw new ApiError(503, 'Bank connections are temporarily unavailable.')
     }
   }
@@ -126,5 +147,17 @@ export class PlaidAdapter implements BankProvider {
   }
   async removeItem(accessToken: string): Promise<void> {
     await this.request('/item/remove', { access_token: accessToken })
+  }
+  async syncTransactions(accessToken: string, cursor: string | null): Promise<PlaidSyncResponse> {
+    return plaidSyncResponseSchema.parse(
+      await this.request('/transactions/sync', {
+        access_token: accessToken,
+        ...(cursor === null ? {} : { cursor }),
+        count: 500,
+      })
+    )
+  }
+  async getWebhookVerificationKey(keyId: string): Promise<unknown> {
+    return this.request('/webhook_verification_key/get', { key_id: keyId })
   }
 }

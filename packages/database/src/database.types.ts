@@ -26,6 +26,12 @@ export interface Database {
     }
     Views: Record<string, never>
     Functions: {
+      claim_bank_sync: { Args: { connection: string; lease: string }; Returns: Json }
+      bind_bank_sync_item: { Args: { connection: string; lease: string; fingerprint: string }; Returns: Json }
+      save_bank_worker_page: { Args: { worker_input: Json }; Returns: Json }
+      restart_bank_sync: { Args: { connection: string; lease: string }; Returns: Json }
+      release_bank_sync: { Args: { connection: string; lease: string; disposition: string }; Returns: Json }
+      enqueue_bank_webhook: { Args: { fingerprint: string; deduplication_key: string; event_type: string }; Returns: Json }
       create_bank_connection: { Args: { connection_input: Json }; Returns: Json }
       save_bank_sync_page: { Args: { page_input: Json }; Returns: Json }
       link_bank_reconciliation: { Args: { link_input: Json }; Returns: Json }

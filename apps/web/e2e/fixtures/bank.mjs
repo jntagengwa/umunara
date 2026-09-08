@@ -1,5 +1,7 @@
 // Loopback-only provider, encrypted secret-store, and RPC boundaries. No database is used.
+import { handleBankSyncFixture } from './bank-sync.mjs'
 export async function handleBankFixture(request, response, url) {
+  if (await handleBankSyncFixture(request, response, url)) return true
   if (
     !url.pathname.startsWith('/__test/plaid/') &&
     !url.pathname.startsWith('/__test/vault/') &&

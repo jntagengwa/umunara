@@ -81,3 +81,46 @@ it('does not accept a failed Vault write', async () => {
     })
   ).rejects.toThrow('Bank secret storage unavailable.')
 })
+it('reads the authenticated envelope with matching connection and actor identity', async () => {
+  const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(Response.json({}))
+  vi.stubGlobal('fetch', fetch)
+  const store = new VaultBankSecretStore(config)
+  const value = {
+    connectionId: reference,
+    actorId: reference,
+    itemId: 'item-secret',
+    accessToken: 'token-secret',
+  }
+  await store.save(reference, value)
+  const envelope = JSON.parse(String(fetch.mock.calls[0]?.[1]?.body)).data
+  const respond = (data = envelope) =>
+    fetch.mockResolvedValueOnce(
+      Response.json({
+        data: { data, metadata: { version: 1, destroyed: false, deletion_time: '' } },
+      })
+    )
+  respond()
+  expect(await store.read(reference, value)).toEqual(value)
+  expect(fetch.mock.lastCall?.[1]).toMatchObject({
+    method: 'GET',
+    cache: 'no-store',
+    redirect: 'error',
+  })
+  respond()
+  await expect(
+    store.read(reference, { ...value, connectionId: '22222222-2222-4222-8222-222222222222' })
+  ).rejects.toThrow('Bank secret storage unavailable.')
+  respond()
+  await expect(store.read('22222222-2222-4222-8222-222222222222', value)).rejects.toThrow(
+    'Bank secret storage unavailable.'
+  )
+  for (const change of [
+    { tag: Buffer.alloc(16).toString('base64') },
+    { nonce: 'invalid' },
+    { version: 2 },
+    { ciphertext: Buffer.alloc(100).toString('base64') },
+  ]) {
+    respond({ ...envelope, ...change })
+    await expect(store.read(reference, value)).rejects.toThrow('Bank secret storage unavailable.')
+  }
+})

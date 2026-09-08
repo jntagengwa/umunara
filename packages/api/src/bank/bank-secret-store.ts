@@ -1,5 +1,5 @@
 import 'server-only'
-import { createCipheriv, randomBytes } from 'node:crypto'
+import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
 import { z } from 'zod'
 import type { BankSecretStore } from './bank-connection-service'
 
@@ -50,5 +50,85 @@ export class VaultBankSecretStore implements BankSecretStore {
       signal: AbortSignal.timeout(10_000),
     })
     if (!response.ok) throw new Error('Bank secret storage unavailable.')
+  }
+
+  async read(
+    reference: string,
+    identity: { connectionId: string; actorId: string }
+  ): Promise<Parameters<BankSecretStore['save']>[1]> {
+    try {
+      z.string().uuid().parse(reference)
+      const response = await fetch(
+        `${this.origin}/v1/${this.config.mount}/data/bank/${reference}`,
+        {
+          method: 'GET',
+          headers: { 'X-Vault-Token': this.config.token },
+          cache: 'no-store',
+          redirect: 'error',
+          signal: AbortSignal.timeout(10_000),
+        }
+      )
+      if (!response.ok) throw new Error('Unavailable')
+      const base64 = (length?: number) =>
+        z
+          .string()
+          .min(1)
+          .max(8192)
+          .refine((value) => {
+            const bytes = Buffer.from(value, 'base64')
+            return (
+              bytes.toString('base64') === value &&
+              (length === undefined || bytes.length === length)
+            )
+          })
+      const envelope = z
+        .object({
+          data: z.object({
+            data: z
+              .object({
+                version: z.literal(1),
+                nonce: base64(12),
+                tag: base64(16),
+                ciphertext: base64(),
+              })
+              .strict(),
+            metadata: z.object({
+              destroyed: z.literal(false),
+              deletion_time: z.literal(''),
+              version: z.literal(1),
+            }),
+          }),
+        })
+        .parse(await response.json()).data.data
+      const decipher = createDecipheriv(
+        'aes-256-gcm',
+        this.key,
+        Buffer.from(envelope.nonce, 'base64')
+      )
+      decipher.setAAD(Buffer.from(reference))
+      decipher.setAuthTag(Buffer.from(envelope.tag, 'base64'))
+      const plaintext = Buffer.concat([
+        decipher.update(Buffer.from(envelope.ciphertext, 'base64')),
+        decipher.final(),
+      ])
+      try {
+        const value = z
+          .object({
+            connectionId: z.string().uuid(),
+            actorId: z.string().uuid(),
+            itemId: z.string().min(1).max(255),
+            accessToken: z.string().min(1).max(1000),
+          })
+          .strict()
+          .parse(JSON.parse(plaintext.toString('utf8')))
+        if (value.connectionId !== identity.connectionId || value.actorId !== identity.actorId)
+          throw new Error('Invalid identity')
+        return value
+      } finally {
+        plaintext.fill(0)
+      }
+    } catch {
+      throw new Error('Bank secret storage unavailable.')
+    }
   }
 }

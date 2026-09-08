@@ -30,6 +30,7 @@ export default defineConfig({
         VERCEL_URL: 'umunara-e2e.vercel.app',
         AUTH_RATE_LIMIT_ENABLED: '1',
         BANK_RATE_LIMIT_ENABLED: '1',
+        BANK_SYNC_SECRET: 'fixture-separate-sync-secret-32-characters',
         PLAID_CLIENT_ID: 'plaid-fixture-client',
         PLAID_SECRET: 'plaid-fixture-secret',
         PLAID_ENVIRONMENT: 'sandbox',
