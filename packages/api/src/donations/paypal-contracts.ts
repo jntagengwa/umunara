@@ -46,12 +46,18 @@ export function readIntent(customId: unknown): PayPalCheckout | null {
   })
 }
 
-export function relatedId(input: unknown, origin: string, path: string): string {
-  const value = links.parse(input).find((link) => link.rel === 'up')
-  if (!value) throw new Error('Missing original payment.')
-  const url = new URL(value.href)
+export function relatedId(input: unknown, environment: 'sandbox' | 'live', path: string): string {
+  const candidates = links.parse(input).filter((link) => link.rel === 'up')
+  if (candidates.length !== 1) throw new Error('Missing or ambiguous original payment.')
+  const url = new URL(candidates[0].href)
+  const allowedHosts =
+    environment === 'live'
+      ? ['api-m.paypal.com', 'api.paypal.com']
+      : ['api-m.sandbox.paypal.com', 'api.sandbox.paypal.com']
   if (
-    url.origin !== origin ||
+    url.protocol !== 'https:' ||
+    !allowedHosts.includes(url.hostname) ||
+    url.port ||
     url.username ||
     url.password ||
     url.search ||

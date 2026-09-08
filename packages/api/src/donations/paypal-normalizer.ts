@@ -8,14 +8,13 @@ import {
 } from '@umunara/schemas'
 import type { DonationRepository } from '@umunara/database/repositories'
 import type { PayPalClient } from './paypal-client'
+import { normalizePayPalAdjustment } from './paypal-adjustments'
 import {
-  links,
   minorUnits,
   money,
   providerId,
   providerTime,
   readIntent,
-  relatedId,
   type PayPalWebhook,
 } from './paypal-contracts'
 
@@ -49,6 +48,9 @@ export class PayPalNormalizer {
     switch (event.event_type) {
       case 'PAYMENT.CAPTURE.COMPLETED':
       case 'PAYMENT.CAPTURE.PENDING':
+      case 'PAYMENT.CAPTURE.DECLINED':
+      // Preserve the documented legacy event name for existing deliveries
+      // that carry the same validated capture snapshot contract.
       case 'PAYMENT.CAPTURE.DENIED':
         return this.capture(event)
       case 'PAYMENT.SALE.COMPLETED':
@@ -57,7 +59,7 @@ export class PayPalNormalizer {
       case 'PAYMENT.SALE.REFUNDED':
       case 'PAYMENT.CAPTURE.REVERSED':
       case 'PAYMENT.SALE.REVERSED':
-        return this.adjustment(event)
+        return normalizePayPalAdjustment(event, this.client.config.environment, this.ledger)
       case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED':
         return this.failedRenewal(event)
       default:
@@ -179,71 +181,6 @@ export class PayPalNormalizer {
           currency: intent.currency,
           cadence: intent.cadence,
         }),
-    })
-  }
-
-  private async adjustment(event: PayPalWebhook): Promise<DonationEvent> {
-    const reversed = event.event_type.endsWith('.REVERSED')
-    const sale = event.event_type.startsWith('PAYMENT.SALE.')
-    const resource = z
-      .object({
-        id: providerId,
-        sale_id: providerId.optional(),
-        links,
-        status: z.string().optional(),
-        state: z.string().optional(),
-        amount: z.unknown().optional(),
-        seller_payable_breakdown: z
-          .object({ total_refunded_amount: money, paypal_fee: money })
-          .optional(),
-      })
-      .parse(event.resource)
-    const reference = reversed
-      ? resource.id
-      : sale
-        ? (resource.sale_id ??
-          relatedId(resource.links, this.client.apiOrigin, '/v1/payments/sale/'))
-        : relatedId(resource.links, this.client.apiOrigin, '/v2/payments/captures/')
-    const original = await this.ledger.findPayPalDonation(reference)
-    // A refund cannot invent a receipt date. Retry after the settlement webhook arrives.
-    if (!original || ['pending', 'failed'].includes(original.donation.status))
-      throw new Error('Original settlement unavailable.')
-    let refunded = original.donation.grossAmountMinor
-    if (!reversed && !sale) {
-      if (resource.status !== 'COMPLETED' || !resource.seller_payable_breakdown)
-        throw new Error('Refund is not settled.')
-      refunded = minorUnits(resource.seller_payable_breakdown.total_refunded_amount)
-      // PayPal does not expose a cumulative refunded-fee total here. Do not apply
-      // a per-refund fee as a cumulative fee or race read/modify/write adjustments.
-      if (minorUnits(resource.seller_payable_breakdown.paypal_fee) !== 0)
-        throw new Error('Refund fee reconciliation required.')
-    } else if (!reversed) {
-      const refundAmount = z
-        .object({ total: z.string(), currency: z.string() })
-        .parse(resource.amount)
-      if (
-        resource.state !== 'completed' ||
-        minorUnits({ value: refundAmount.total, currency_code: refundAmount.currency }) !== refunded
-      )
-        throw new Error('Cumulative sale refund reconciliation required.')
-    }
-    return donationEventSchema.parse({
-      ...original,
-      providerEventId: event.id,
-      occurredAt: event.create_time,
-      donation: normalizeDonation({
-        provider: 'paypal',
-        amountMinor: original.donation.grossAmountMinor,
-        feeAmountMinor: original.donation.feeAmountMinor,
-        refundedAmountMinor: refunded,
-        currency: original.donation.currency,
-        cadence: original.donation.cadence,
-        status: reversed
-          ? 'reversed'
-          : refunded === original.donation.grossAmountMinor
-            ? 'refunded'
-            : 'succeeded',
-      }),
     })
   }
 

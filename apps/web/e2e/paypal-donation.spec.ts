@@ -98,18 +98,62 @@ test('verifies raw webhooks and preserves one gift across duplicates, refunds, r
     supplementary_data: { related_ids: { order_id: 'ORDER123' } },
   }
   expect((await send('PAYMENT.CAPTURE.COMPLETED', capture, 'invalid', false)).status()).toBe(400)
+  expect(
+    (
+      await send('PAYMENT.CAPTURE.DECLINED', {
+        ...capture,
+        status: 'DECLINED',
+        create_time: '2026-09-30T23:00:00Z',
+      })
+    ).status()
+  ).toBe(200)
   expect((await send('PAYMENT.CAPTURE.COMPLETED', capture)).status()).toBe(200)
   expect((await send('PAYMENT.CAPTURE.COMPLETED', capture)).status()).toBe(200)
   const refund = {
     id: 'REFUND123',
     status: 'COMPLETED',
+    amount: money('5.00'),
     seller_payable_breakdown: { total_refunded_amount: money('5.00'), paypal_fee: money('0.00') },
-    links: [
-      { rel: 'up', href: 'https://api-m.sandbox.paypal.com/v2/payments/captures/CAPTURE123' },
-    ],
+    links: [{ rel: 'up', href: 'https://api.sandbox.paypal.com/v2/payments/captures/CAPTURE123' }],
   }
   expect((await send('PAYMENT.CAPTURE.REFUNDED', refund)).status()).toBe(200)
-  expect((await send('PAYMENT.CAPTURE.REVERSED', { id: 'CAPTURE123' })).status()).toBe(200)
+  const reversal = {
+    ...refund,
+    id: 'REVERSAL123',
+    amount: money('25.00'),
+    seller_payable_breakdown: { total_refunded_amount: money('25.00'), paypal_fee: money('0.00') },
+  }
+  expect(
+    (
+      await send(
+        'PAYMENT.CAPTURE.REVERSED',
+        { ...reversal, amount: money('5.00'), seller_payable_breakdown: undefined },
+        'ambiguous-partial'
+      )
+    ).status()
+  ).toBe(503)
+  expect(
+    (
+      await send(
+        'PAYMENT.CAPTURE.REVERSED',
+        {
+          ...reversal,
+          amount: money('5.00'),
+          seller_payable_breakdown: {
+            total_refunded_amount: money('10.00'),
+            paypal_fee: money('0.00'),
+          },
+        },
+        'partial-reversal'
+      )
+    ).status()
+  ).toBe(200)
+  const partial = await (await request.get('http://127.0.0.1:55431/__test/paypal-ledger')).json()
+  expect(partial.projections[1]).toMatchObject({
+    providerReference: 'CAPTURE123',
+    donation: { status: 'succeeded', refundedAmountMinor: 1000, netAmountMinor: 1400 },
+  })
+  expect((await send('PAYMENT.CAPTURE.REVERSED', reversal)).status()).toBe(200)
   expect(
     (
       await send('BILLING.SUBSCRIPTION.PAYMENT.FAILED', {
@@ -121,11 +165,15 @@ test('verifies raw webhooks and preserves one gift across duplicates, refunds, r
     ).status()
   ).toBe(200)
   const result = await (await request.get('http://127.0.0.1:55431/__test/paypal-ledger')).json()
-  expect(result).toMatchObject({ events: 4, applications: 4 })
-  expect(result.projections).toHaveLength(2)
+  expect(result).toMatchObject({ events: 6, applications: 6 })
+  expect(result.projections).toHaveLength(3)
   expect(result.projections[0]).toMatchObject({
+    providerReference: 'unsettled:CAPTURE123',
+    donation: { status: 'failed' },
+  })
+  expect(result.projections[1]).toMatchObject({
     receivedAt: '2026-10-02T12:00:00.000Z',
     donation: { status: 'reversed', netAmountMinor: -100 },
   })
-  expect(result.projections[1].donation.status).toBe('failed')
+  expect(result.projections[2].donation.status).toBe('failed')
 })

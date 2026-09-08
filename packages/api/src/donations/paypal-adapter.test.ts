@@ -126,7 +126,17 @@ afterEach(() => vi.unstubAllGlobals())
 it('records a verified reversal against the settled gift without changing its receipt date', async () => {
   const app = service()
   await app.handlePayPalEvent(event('PAYMENT.CAPTURE.COMPLETED'), headers)
-  await app.handlePayPalEvent(event('PAYMENT.CAPTURE.REVERSED'), headers)
+  await app.handlePayPalEvent(
+    event('PAYMENT.CAPTURE.REVERSED', {
+      id: 'REVERSAL123',
+      status: 'COMPLETED',
+      amount: money('25.00'),
+      links: [
+        { rel: 'up', href: 'https://api.sandbox.paypal.com/v2/payments/captures/CAPTURE123' },
+      ],
+    }),
+    headers
+  )
   expect(events[1]).toMatchObject({
     providerReference: 'CAPTURE123',
     receivedAt: '2026-10-02T12:00:00.000Z',
@@ -247,7 +257,7 @@ it('resolves a capture intent from its order when the webhook omits custom_id', 
   await service().handlePayPalEvent(event('PAYMENT.CAPTURE.COMPLETED', resource), headers)
   expect(events[0]?.donation.netAmountMinor).toBe(2400)
 })
-it.each(['PENDING', 'DENIED'])(
+it.each(['PENDING', 'DECLINED', 'DENIED'])(
   'records %s capture attempts outside the immutable settled receipt',
   async (status) => {
     const app = service()
@@ -271,6 +281,137 @@ it.each(['PENDING', 'DENIED'])(
     })
   }
 )
+
+it('applies verified cumulative partial reversals without marking the full gift reversed', async () => {
+  const app = service()
+  await app.handlePayPalEvent(event('PAYMENT.CAPTURE.COMPLETED'), headers)
+  await app.handlePayPalEvent(
+    event('PAYMENT.CAPTURE.REVERSED', {
+      id: 'REVERSAL123',
+      status: 'COMPLETED',
+      amount: money('5.00'),
+      seller_payable_breakdown: {
+        total_refunded_amount: money('10.00'),
+        paypal_fee: money('0.00'),
+      },
+      links: [
+        { rel: 'up', href: 'https://api-m.sandbox.paypal.com/v2/payments/captures/CAPTURE123' },
+      ],
+    }),
+    headers
+  )
+  expect(events[1]).toMatchObject({
+    providerReference: 'CAPTURE123',
+    donation: { status: 'succeeded', refundedAmountMinor: 1000, netAmountMinor: 1400 },
+  })
+})
+
+it('resolves sale reversals by sale_id and validates the original receipt amount', async () => {
+  const app = service()
+  await app.handlePayPalEvent(
+    event('PAYMENT.SALE.COMPLETED', {
+      id: 'SALE123',
+      state: 'completed',
+      billing_agreement_id: 'I-SUB123',
+      amount: { total: '25.00', currency: 'USD' },
+      transaction_fee: { value: '1.00', currency: 'USD' },
+      update_time: '2026-10-02T12:00:00Z',
+    }),
+    headers
+  )
+  await app.handlePayPalEvent(
+    event('PAYMENT.SALE.REVERSED', {
+      id: 'REFUND123',
+      sale_id: 'SALE123',
+      state: 'completed',
+      amount: { total: '25.00', currency: 'USD' },
+      links: [{ rel: 'up', href: 'https://api.sandbox.paypal.com/v1/payments/sale/SALE123' }],
+    }),
+    headers
+  )
+  expect(events[1]).toMatchObject({
+    providerReference: 'SALE123',
+    donation: { status: 'reversed', netAmountMinor: -100 },
+  })
+})
+
+it.each([
+  { amount: money('5.00') },
+  { amount: { value: '25.00', currency_code: 'EUR' } },
+  { amount: money('30.00') },
+  { amount: money('0.00') },
+  { amount: undefined },
+  {
+    amount: money('5.00'),
+    seller_payable_breakdown: { total_refunded_amount: money('2.00'), paypal_fee: money('0.00') },
+  },
+  { amount: money('25.00'), capture_id: 'OTHER123' },
+])(
+  'rejects ambiguous or inconsistent reversal money/identity before ledger writes: %j',
+  async (change) => {
+    const app = service()
+    await app.handlePayPalEvent(event('PAYMENT.CAPTURE.COMPLETED'), headers)
+    await expect(
+      app.handlePayPalEvent(
+        event('PAYMENT.CAPTURE.REVERSED', {
+          id: 'REFUND123',
+          status: 'COMPLETED',
+          links: [
+            { rel: 'up', href: 'https://api-m.sandbox.paypal.com/v2/payments/captures/CAPTURE123' },
+          ],
+          ...change,
+        }),
+        headers
+      )
+    ).rejects.toMatchObject({ status: 503 })
+    expect(events).toHaveLength(1)
+  }
+)
+
+it.each(['api.sandbox.paypal.com', 'api-m.sandbox.paypal.com'])(
+  'accepts the documented sandbox HATEOAS host %s',
+  async (host) => {
+    const app = service()
+    await app.handlePayPalEvent(event('PAYMENT.CAPTURE.COMPLETED'), headers)
+    await app.handlePayPalEvent(
+      event('PAYMENT.CAPTURE.REFUNDED', {
+        id: 'REFUND123',
+        status: 'COMPLETED',
+        amount: money('25.00'),
+        seller_payable_breakdown: {
+          total_refunded_amount: money('25.00'),
+          paypal_fee: money('0.00'),
+        },
+        links: [{ rel: 'up', href: `https://${host}/v2/payments/captures/CAPTURE123` }],
+      }),
+      headers
+    )
+    expect(events[1]?.providerReference).toBe('CAPTURE123')
+  }
+)
+
+it.each([
+  'https://api.paypal.com',
+  'https://api-m.paypal.com',
+  'http://api.sandbox.paypal.com',
+  'https://api.sandbox.paypal.com.evil.test',
+  'https://api.sandbox.paypal.com:444',
+])('rejects mismatched or unsafe HATEOAS origin %s', async (origin) => {
+  const app = service()
+  await app.handlePayPalEvent(event('PAYMENT.CAPTURE.COMPLETED'), headers)
+  await expect(
+    app.handlePayPalEvent(
+      event('PAYMENT.CAPTURE.REVERSED', {
+        id: 'REFUND123',
+        status: 'COMPLETED',
+        amount: money('25.00'),
+        links: [{ rel: 'up', href: `${origin}/v2/payments/captures/CAPTURE123` }],
+      }),
+      headers
+    )
+  ).rejects.toMatchObject({ status: 503 })
+  expect(events).toHaveLength(1)
+})
 it('does not manufacture zero fees when settlement fees are absent', async () => {
   const { seller_receivable_breakdown, ...resource } = capture
   expect(seller_receivable_breakdown).toBeDefined()
