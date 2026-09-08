@@ -1,4 +1,14 @@
 {
+  "waiting": {
+    "accounts": [],
+    "added": [],
+    "modified": [],
+    "removed": [],
+    "next_cursor": "",
+    "has_more": false,
+    "transactions_update_status": "NOT_READY",
+    "request_id": "waiting-fixture"
+  },
   "initial": {
     "added": [
       {

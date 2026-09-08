@@ -184,6 +184,32 @@ it('retains durable pending continuation after a bounded number of pages', async
   expect(f.provider.syncTransactions).toHaveBeenCalledTimes(20)
   expect(f.repository.release).toHaveBeenCalledWith(id, expect.any(String), 'continue')
 })
+it.each([null, 'stored'])(
+  'keeps %s cursor and pending work when initial transactions are not ready',
+  async (cursor) => {
+    const f = fixture()
+    const claimed = await f.repository.claim()
+    f.repository.claim.mockResolvedValue({ ...claimed, cursor })
+    f.provider.syncTransactions.mockResolvedValue({
+      added: [],
+      modified: [],
+      removed: [],
+      next_cursor: '',
+      has_more: false,
+    })
+    expect(await f.service.sync(id)).toEqual({
+      added: 0,
+      modified: 0,
+      removed: 0,
+      outcome: 'waiting',
+      retryAfterSeconds: 60,
+    })
+    expect(f.provider.syncTransactions).toHaveBeenCalledWith('private-access', cursor)
+    expect(f.repository.savePage).not.toHaveBeenCalled()
+    expect(f.repository.restart).not.toHaveBeenCalled()
+    expect(f.repository.release).toHaveBeenCalledWith(id, expect.any(String), 'continue')
+  }
+)
 it.each([1.001, Number.MAX_SAFE_INTEGER])(
   'rejects unsafe money %s without advancing',
   async (amount) => {

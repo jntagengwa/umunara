@@ -32,6 +32,7 @@ const events = new Set()
 let cursor = null
 let pending = true
 let applied = 0
+let waiting = false
 export async function handleBankSyncFixture(request, response, url) {
   const path = url.pathname
   const rpc = path.replace('/rest/v1/rpc/', '')
@@ -59,6 +60,7 @@ export async function handleBankSyncFixture(request, response, url) {
     pending = true
     applied = 0
     events.clear()
+    waiting = input.waiting === true
   }
   if (path === '/__test/bank-sync/stats') result = { cursor, pending, applied, events: events.size }
   if (path === '/__test/bank-sync/sign') {
@@ -98,11 +100,14 @@ export async function handleBankSyncFixture(request, response, url) {
     }
   if (path === '/__test/plaid/transactions/sync') {
     if (input.access_token !== 'sync-access-private') response.statusCode = 400
-    result = !input.cursor
-      ? pages.initial
-      : input.cursor === 'cursor-1'
-        ? pages.incremental
-        : { added: [], modified: [], removed: [], next_cursor: 'cursor-2', has_more: false }
+    result = waiting
+      ? pages.waiting
+      : !input.cursor
+        ? pages.initial
+        : input.cursor === 'cursor-1'
+          ? pages.incremental
+          : { added: [], modified: [], removed: [], next_cursor: 'cursor-2', has_more: false }
+    waiting = false
   }
   if (
     path.startsWith('/rest/v1/rpc/') &&

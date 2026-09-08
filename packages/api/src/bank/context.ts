@@ -7,6 +7,9 @@ import { PlaidAdapter } from './plaid-adapter'
 import { VaultBankSecretStore } from './bank-secret-store'
 import { BankSyncService } from './bank-sync-service'
 import { PlaidWebhookVerifier } from './plaid-webhook-verifier'
+import { PlaidWebhookKeyCache } from './plaid-webhook-key-cache'
+
+const webhookKeys = { sandbox: new PlaidWebhookKeyCache(), production: new PlaidWebhookKeyCache() }
 
 function createBankDependencies() {
   const {
@@ -59,6 +62,9 @@ export function createBankSyncService(): BankSyncService {
     provider,
     secrets,
     new BankSyncRepository(createAdminClient()),
-    new PlaidWebhookVerifier(provider)
+    new PlaidWebhookVerifier(
+      provider,
+      process.env.PLAID_ENVIRONMENT === 'production' ? webhookKeys.production : webhookKeys.sandbox
+    )
   )
 }

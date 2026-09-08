@@ -85,3 +85,21 @@ it('fails safely when key lookup fails', async () => {
   f.provider.getWebhookVerificationKey.mockRejectedValue(new Error('private-key-provider-details'))
   await expect(f.verifier.verify(f.headers, body)).rejects.toThrow('Invalid Plaid webhook.')
 })
+it('rejects stale claims and invalid signature sizes without a remote key lookup', async () => {
+  const f = fixture({ iat: now - 301 })
+  await expect(f.verifier.verify(f.headers, body)).rejects.toThrow()
+  expect(f.provider.getWebhookVerificationKey).not.toHaveBeenCalled()
+  const current = fixture()
+  const parts = current.headers.get('plaid-verification')!.split('.')
+  parts[2] = 'AA'
+  await expect(
+    current.verifier.verify(new Headers({ 'plaid-verification': parts.join('.') }), body)
+  ).rejects.toThrow()
+  expect(current.provider.getWebhookVerificationKey).not.toHaveBeenCalled()
+})
+it('reuses a recently validated provider key', async () => {
+  const f = fixture()
+  await f.verifier.verify(f.headers, body)
+  await f.verifier.verify(f.headers, body)
+  expect(f.provider.getWebhookVerificationKey).toHaveBeenCalledTimes(1)
+})

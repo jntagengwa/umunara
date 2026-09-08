@@ -3,20 +3,7 @@ import { createHash, createPublicKey, timingSafeEqual, verify } from 'node:crypt
 import { z } from 'zod'
 import { ApiError } from '../errors'
 import type { VerifiedBankWebhook } from './bank-sync-service'
-
-const keySchema = z.object({
-  key: z.object({
-    alg: z.literal('ES256'),
-    kty: z.literal('EC'),
-    crv: z.literal('P-256'),
-    use: z.literal('sig'),
-    kid: z.string().min(1).max(255),
-    x: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
-    y: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
-    created_at: z.number().int(),
-    expired_at: z.number().int().nullable(),
-  }),
-})
+import { PlaidWebhookKeyCache } from './plaid-webhook-key-cache'
 function decode(segment: string): unknown {
   const bytes = Buffer.from(segment, 'base64url')
   if (bytes.toString('base64url') !== segment) throw new Error('Invalid encoding')
@@ -26,7 +13,8 @@ function decode(segment: string): unknown {
 /** Only Plaid's ES256 JWT profile is accepted; crypto operations use Node/OpenSSL. */
 export class PlaidWebhookVerifier {
   constructor(
-    private readonly provider: { getWebhookVerificationKey(keyId: string): Promise<unknown> }
+    private readonly provider: { getWebhookVerificationKey(keyId: string): Promise<unknown> },
+    private readonly keys = new PlaidWebhookKeyCache()
   ) {}
   async verify(headers: Headers, body: string): Promise<VerifiedBankWebhook> {
     try {
@@ -35,7 +23,9 @@ export class PlaidWebhookVerifier {
       const segments = token.split('.')
       if (segments.length !== 3 || segments.some((value) => !/^[A-Za-z0-9_-]+$/.test(value)))
         throw new Error('Invalid JWT')
-      const [header, payload, signature] = segments as [string, string, string]
+      const [header, payload, signature] = z
+        .tuple([z.string(), z.string(), z.string()])
+        .parse(segments)
       const decoded = z
         .object({
           alg: z.literal('ES256'),
@@ -44,24 +34,9 @@ export class PlaidWebhookVerifier {
         })
         .strict()
         .parse(decode(header))
-      const key = keySchema.parse(await this.provider.getWebhookVerificationKey(decoded.kid)).key
       const now = Math.floor(Date.now() / 1000)
-      if (key.kid !== decoded.kid || key.expired_at !== null || key.created_at > now)
-        throw new Error('Invalid key')
       const signatureBytes = Buffer.from(signature, 'base64url')
-      if (
-        signatureBytes.length !== 64 ||
-        signatureBytes.toString('base64url') !== signature ||
-        !verify(
-          'sha256',
-          Buffer.from(`${header}.${payload}`),
-          {
-            key: createPublicKey({ key, format: 'jwk' }),
-            dsaEncoding: 'ieee-p1363',
-          },
-          signatureBytes
-        )
-      )
+      if (signatureBytes.length !== 64 || signatureBytes.toString('base64url') !== signature)
         throw new Error('Invalid signature')
       const claims = z
         .object({
@@ -74,7 +49,6 @@ export class PlaidWebhookVerifier {
       if (
         claims.iat > now ||
         now - claims.iat > 300 ||
-        claims.iat < key.created_at ||
         (claims.exp !== undefined && claims.exp <= now) ||
         (claims.nbf !== undefined && claims.nbf > now)
       )
@@ -82,6 +56,25 @@ export class PlaidWebhookVerifier {
       const hash = createHash('sha256').update(body).digest()
       if (!timingSafeEqual(hash, Buffer.from(claims.request_body_sha256, 'hex')))
         throw new Error('Body mismatch')
+      // Untrusted claims above only reject cheaply. Nothing is accepted or scheduled
+      // until the provider key and signature have authenticated these exact bytes.
+      const key = await this.keys.get(this.provider, decoded.kid)
+      const verifiedAt = Math.floor(Date.now() / 1000)
+      if (
+        verifiedAt - claims.iat > 300 ||
+        (claims.exp !== undefined && claims.exp <= verifiedAt) ||
+        claims.iat < key.created_at ||
+        !verify(
+          'sha256',
+          Buffer.from(`${header}.${payload}`),
+          {
+            key: createPublicKey({ key, format: 'jwk' }),
+            dsaEncoding: 'ieee-p1363',
+          },
+          signatureBytes
+        )
+      )
+        throw new Error('Invalid signature')
       const event = z
         .object({
           webhook_type: z.string(),

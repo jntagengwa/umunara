@@ -20,10 +20,15 @@ export const plaidSyncResponseSchema = z
     removed: z
       .array(z.object({ transaction_id: identifier, account_id: identifier.optional() }))
       .max(500),
-    next_cursor: z.string().min(1).max(4096),
+    next_cursor: z.string().max(4096),
     has_more: z.boolean(),
   })
   .refine((value) => value.added.length + value.modified.length + value.removed.length <= 500)
+  .refine(
+    (value) =>
+      value.next_cursor !== '' ||
+      (!value.has_more && value.added.length + value.modified.length + value.removed.length === 0)
+  )
 export type PlaidSyncResponse = z.infer<typeof plaidSyncResponseSchema>
 export class PlaidSyncError extends Error {
   constructor(

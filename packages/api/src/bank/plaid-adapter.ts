@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { bankConnectionAccountSchema, type BankConnectionAccount } from '@umunara/schemas'
 import { ApiError } from '../errors'
 import type { BankProvider } from './bank-connection-service'
+import { parsePlaidSyncJson } from './plaid-json'
 import {
   PlaidSyncError,
   plaidSyncResponseSchema,
@@ -76,7 +77,9 @@ export class PlaidAdapter implements BankProvider {
         }
         throw new Error('Provider unavailable.')
       }
-      return await response.json()
+      return path === '/transactions/sync'
+        ? parsePlaidSyncJson(await response.text())
+        : await response.json()
     } catch (error) {
       if (error instanceof PlaidSyncError) throw error
       throw new ApiError(503, 'Bank connections are temporarily unavailable.')

@@ -31,6 +31,9 @@ export type VerifiedBankWebhook = {
   deduplicationKey: string
   eventType: string
 } | null
+export type BankSyncResult = { added: number; modified: number; removed: number } & (
+  { outcome: 'waiting'; retryAfterSeconds: 60 } | { outcome?: never; retryAfterSeconds?: never }
+)
 export class BankSyncService {
   constructor(
     private readonly provider: {
@@ -48,7 +51,7 @@ export class BankSyncService {
     }
   ) {}
 
-  async sync(connectionId: string): Promise<{ added: number; modified: number; removed: number }> {
+  async sync(connectionId: string): Promise<BankSyncResult> {
     z.string().uuid().parse(connectionId)
     const leaseId = randomUUID()
     const counts = { added: 0, modified: 0, removed: 0 }
@@ -73,6 +76,14 @@ export class BankSyncService {
           Object.assign(context, await this.repository.restart(connectionId, leaseId))
           restarted = true
           continue
+        }
+        if (
+          data.next_cursor === '' &&
+          !data.has_more &&
+          data.added.length + data.modified.length + data.removed.length === 0
+        ) {
+          await this.repository.release(connectionId, leaseId, 'continue')
+          return { ...counts, outcome: 'waiting', retryAfterSeconds: 60 }
         }
         const page = normalizeSyncPage(context, data)
         // Retry only the identical normalized page. Ambiguous commits are resolved by

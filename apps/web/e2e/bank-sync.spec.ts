@@ -5,10 +5,25 @@ test('production routes verify webhooks and run only secret-authorized cursor sy
 }) => {
   const connectionId = '71000000-0000-4000-8000-000000000001'
   const headers = { authorization: 'Bearer fixture-separate-sync-secret-32-characters' }
-  await request.post('http://127.0.0.1:55431/__test/bank-sync/reset')
+  await request.post('http://127.0.0.1:55431/__test/bank-sync/reset', { data: { waiting: true } })
   expect(
     (await request.post('/api/v1/internal/bank/sync', { data: { connectionId } })).status()
   ).toBe(401)
+  const waiting = await request.post('/api/v1/internal/bank/sync', {
+    data: { connectionId },
+    headers,
+  })
+  expect(waiting.status()).toBe(200)
+  expect(await waiting.json()).toEqual({
+    added: 0,
+    modified: 0,
+    removed: 0,
+    outcome: 'waiting',
+    retryAfterSeconds: 60,
+  })
+  expect(await (await request.get('http://127.0.0.1:55431/__test/bank-sync/stats')).json()).toEqual(
+    { cursor: null, pending: true, applied: 0, events: 0 }
+  )
   const initial = await request.post('/api/v1/internal/bank/sync', {
     data: { connectionId },
     headers,

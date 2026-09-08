@@ -99,3 +99,24 @@ it('discards unsafe masks and never exposes a provider error body', async () => 
     message: 'Bank connections are temporarily unavailable.',
   })
 })
+it.each(['90071992547409.91', '1.00000000000000001'])(
+  'rejects JSON amount precision loss before import (%s)',
+  async (amount) => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            `{"added":[{"transaction_id":"t1","account_id":"a1","amount":${amount},"iso_currency_code":"USD","date":"2026-09-01","name":"Credit","pending":false}],"modified":[],"removed":[],"next_cursor":"next","has_more":false}`
+          )
+        )
+    )
+    await expect(adapter.syncTransactions('access-fixture', null)).rejects.toThrow()
+  }
+)
+it('accepts the documented empty-cursor waiting response', async () => {
+  const waiting = { added: [], modified: [], removed: [], next_cursor: '', has_more: false }
+  mockFetch(waiting)
+  expect(await adapter.syncTransactions('access-fixture', null)).toEqual(waiting)
+})
