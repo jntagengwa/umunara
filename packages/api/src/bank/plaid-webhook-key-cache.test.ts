@@ -64,3 +64,47 @@ it('bounds distinct key lookups even when each request invents a new ID', async 
   expect(provider.getWebhookVerificationKey).toHaveBeenCalledTimes(8)
   expect((await cache.get(provider, '0')).kid).toBe('0')
 })
+it('does not let negative entries evict an unexpired trusted key', async () => {
+  vi.useFakeTimers()
+  const cache = new PlaidWebhookKeyCache()
+  const provider = {
+    getWebhookVerificationKey: vi.fn(async (kid: string) => {
+      if (kid !== 'trusted') throw new Error('Unknown key')
+      return key(kid)
+    }),
+  }
+  await expect(cache.get(provider, 'initial-unknown')).rejects.toThrow()
+  vi.advanceTimersByTime(59_000)
+  await cache.get(provider, 'trusted')
+  vi.advanceTimersByTime(1_001)
+  for (let index = 0; index < 8; index++)
+    await expect(cache.get(provider, `unknown-${index}`)).rejects.toThrow()
+  expect((await cache.get(provider, 'trusted')).kid).toBe('trusted')
+  expect(
+    provider.getWebhookVerificationKey.mock.calls.filter(([kid]) => kid === 'trusted')
+  ).toHaveLength(1)
+})
+it('reserves a trusted-key refresh slot while all discovery slots are occupied', async () => {
+  vi.useFakeTimers()
+  const cache = new PlaidWebhookKeyCache()
+  const finish: Array<() => void> = []
+  const provider = {
+    getWebhookVerificationKey: vi.fn(async (kid: string) => {
+      if (kid === 'trusted') return key(kid)
+      await new Promise<void>((resolve) => finish.push(resolve))
+      throw new Error('Unknown key')
+    }),
+  }
+  await cache.get(provider, 'trusted')
+  vi.advanceTimersByTime(60_001)
+  const unknown = Array.from({ length: 4 }, (_, index) =>
+    cache.get(provider, `unknown-${index}`).catch(() => null)
+  )
+  try {
+    expect((await cache.get(provider, 'trusted')).kid).toBe('trusted')
+    expect(provider.getWebhookVerificationKey).toHaveBeenCalledTimes(6)
+  } finally {
+    finish.forEach((resolve) => resolve())
+    await Promise.all(unknown)
+  }
+})

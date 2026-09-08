@@ -39,7 +39,10 @@ function fixture(claims = {}, header = {}, key = {}) {
     headers: new Headers({ 'Plaid-Verification': token }),
   }
 }
-afterEach(() => vi.restoreAllMocks())
+afterEach(() => {
+  vi.restoreAllMocks()
+  vi.useRealTimers()
+})
 it('verifies real ES256 signatures and deduplicates signed delivery metadata', async () => {
   const f = fixture()
   const event = await f.verifier.verify(f.headers, body)
@@ -102,4 +105,23 @@ it('reuses a recently validated provider key', async () => {
   await f.verifier.verify(f.headers, body)
   await f.verifier.verify(f.headers, body)
   expect(f.provider.getWebhookVerificationKey).toHaveBeenCalledTimes(1)
+})
+it('accepts a valid delivery after eight unknown IDs exhaust discovery following a window reset', async () => {
+  vi.useFakeTimers()
+  const f = fixture()
+  const validKey = await f.provider.getWebhookVerificationKey()
+  f.provider.getWebhookVerificationKey.mockClear().mockImplementation(async (kid: string) => {
+    if (kid !== 'key') throw new Error('Unknown provider key')
+    return validKey
+  })
+  const expected = await f.verifier.verify(f.headers, body)
+  vi.advanceTimersByTime(60_001)
+  for (let index = 0; index < 8; index++) {
+    const unknown = fixture({}, { kid: `unknown-${index}` })
+    await expect(f.verifier.verify(unknown.headers, body)).rejects.toThrow('Invalid Plaid webhook.')
+  }
+  expect(await f.verifier.verify(f.headers, body)).toEqual(expected)
+  expect(
+    f.provider.getWebhookVerificationKey.mock.calls.filter(([kid]) => kid === 'key')
+  ).toHaveLength(2)
 })

@@ -71,3 +71,23 @@ Verification in this round:
 - `npm exec -- playwright test`: **22/22 passed** in 16.0s, including the new waiting-then-import flow against the production build. Only approved loopback fixtures ran.
 
 Database/pgTAP, real provider/Vault and deployment checks remain unrun for the previously recorded reasons. Existing warning categories remain nonfatal. All changed files and the diff were inspected before the focused local commit.
+
+## Review fix round 2
+
+Corrected the shared negative-cache/lookup-budget availability issue. Changes are limited to `plaid-webhook-key-cache.ts`, its tests, verifier regression tests and this report. Signature verification code is unchanged.
+
+Positive provider keys and negative lookup results now occupy separate bounded stores: eight positive entries with the existing 60-second TTL and sixteen negative entries with the existing 10-second cooldown. Unknown-key failures cannot evict trusted entries. An expired positive entry retains its established-key identity so it can use the dedicated refresh path; stale key material is still never returned after expiry or a failed refresh.
+
+Discovery and established-key refresh have independent budgets of eight requests per minute. Their in-flight limits are four and two respectively. Consequently unknown IDs cannot consume refresh requests or occupy reserved refresh slots. This supersedes the shared eight-request/four-slot limits documented in round 1. Concurrent requests for the same key still share one lookup. New-key rotation, TTL refresh, revoked-key rejection and safe failure behavior remain covered. A genuinely new rotation key can still be delayed by an exhausted discovery budget; gateway controls remain necessary for aggregate multi-instance traffic. Existing trusted keys retain their independent refresh path during that event.
+
+The two reproduced failures were recorded before implementation: eight negative unknown IDs after a lookup-window reset caused an unexpired positive key to disappear, and the same sequence after positive TTL expiry prevented a correctly signed delivery from refreshing its trusted key. Both now pass. A third regression proves a trusted refresh succeeds while all four unknown-key discovery slots are occupied. The verifier regression signs real ES256 JWTs and requires the valid delivery to be accepted after all eight unknown IDs are rejected.
+
+Verification:
+
+- Focused cache/verifier suite passed after the two red regressions; final full run includes **22 passing cache/verifier tests** including the additional concurrency case.
+- `npm test`: **368 passed** — web 105, API 188, repository 34, schemas 41.
+- `npm run typecheck`, `npm run lint`, Prettier check for every changed TypeScript file and `git diff --check`: passed.
+- `npm run build`: passed, compiled in 820ms; **35/35 pages** generated.
+- `npm exec -- playwright test`: **22/22 passed** in 25.7s against the production build using only the approved local fixture servers.
+
+All changed source/tests and the diff were inspected. No dependency, environment configuration, SQL, live database, Plaid account, Vault backend or deployment was touched. Previously recorded database/provider deployment verification gaps remain unchanged.
