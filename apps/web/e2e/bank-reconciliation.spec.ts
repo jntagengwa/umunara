@@ -33,13 +33,17 @@ test('admin filters, confirms and reconciles a payout without increasing giving'
 }) => {
   await context.request.delete('http://127.0.0.1:55431/__test/bank-review')
   await signIn(context, 'admin')
-  const summaryUrl = '/api/v1/admin/donations/summary?from=2026-09-01&to=2026-09-30&currency=USD'
+  const summaryUrl = '/api/v1/admin/donations/summary?from=2026-09-07&to=2026-09-07&currency=USD'
   const before = await (await context.request.get(summaryUrl)).json()
+  expect(before).toMatchObject({ giftCount: 1, grossAmountMinor: 10000, netAmountMinor: 9700 })
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/admin/bank')
   const review = page.getByRole('region', { name: 'Bank transaction review', exact: true })
+  await review.getByLabel('From', { exact: true }).fill('2026-09-01')
+  await review.getByLabel('To', { exact: true }).fill('2026-09-30')
+  await review.getByRole('button', { name: 'Apply filters' }).click()
   await expect(review.getByRole('table')).toBeVisible()
   await review.getByRole('button', { name: 'Next page' }).click()
   await expect(review.getByText('Bank charge 25', { exact: true })).toBeVisible()

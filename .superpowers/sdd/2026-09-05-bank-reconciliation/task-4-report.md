@@ -51,3 +51,16 @@ Once the named stack is healthy and migrations are separately applied through th
 Rerun the Task 1–3 and existing core/donation SQL suites on that same isolated stack. Validate classification/link/sync concurrency and representative-volume filtered query plans before rollout. Offset pages can shift during concurrent imports; refresh establishes a new current view. Existing Task 2 rate-limit configuration remains required; no firewall/provider/secrets configuration was changed.
 
 The Supabase CLI help and `migration new bank_review` created only an empty source migration, with approved local telemetry-write escalation. No database command was executed. Current [Supabase function security documentation](https://supabase.com/docs/guides/database/functions) informed the service-only invoker/definer boundaries. Karpathy, execution, existing-worktree, Supabase and finishing guidance kept scope surgical and preserved the authorized local-commit workflow. No subagent, push, merge, deployment or cleanup was performed.
+
+## Review fix round 1 — deterministic browser fixture dates
+
+The reconciliation browser test now fills From `2026-09-01` and To `2026-09-30` and submits Apply filters before asserting any fixture transaction or pagination result. It no longer assumes the page's current-month default includes the September 7 fixture. The later amount/account/classification filters, pagination, confirmation, conflict recovery and reconciliation assertions are preserved.
+
+The initial focused rerun additionally exposed an unrelated persisted September monthly summary from another browser fixture (2450 net instead of the seeded 9700). This test now uses the fixture gift's single-day summary range, September 7, and asserts the expected starting gift count/gross/net before comparing the post-match summary. Application cache behavior is unchanged.
+
+Files changed: `apps/web/e2e/bank-reconciliation.spec.ts` and this report only.
+
+- Focused reconciliation browser suite: **2/2 passed** in 3.6s.
+- Full browser suite: **24/24 passed** in 18.3s against the existing production build and loopback fixtures.
+- Web typecheck, explicit browser-test ESLint, Prettier check and `git diff --check`: passed. The changed test and diff were re-read.
+- Build and source unit suites were not repeated because no application or source-unit-test code changed. Prior source/build verification remains applicable. No database/provider/deployment operation was performed; previously recorded SQL/runtime release gates remain unchanged.
