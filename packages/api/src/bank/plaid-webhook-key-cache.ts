@@ -38,7 +38,7 @@ export class PlaidWebhookKeyCache {
       this.refresh.lookups = 0
     }
     // Unknown IDs cannot spend the budget or occupy the slots needed to refresh
-    // an established key. Expired trusted entries retain their refresh eligibility.
+    // an established key. TTL-expired entries remain eligible until invalidated.
     const pool = cached ? this.refresh : this.discovery
     const concurrency = cached ? 2 : 4
     if (pool.pending.size >= concurrency || pool.lookups >= 8)
@@ -55,9 +55,19 @@ export class PlaidWebhookKeyCache {
 
   private async load(provider: KeyProvider, keyId: string): Promise<VerificationKey> {
     try {
-      const key = keySchema.parse(await provider.getWebhookVerificationKey(keyId)).key
-      if (key.kid !== keyId || key.expired_at !== null || key.created_at > Date.now() / 1000)
+      const response = keySchema.safeParse(await provider.getWebhookVerificationKey(keyId))
+      if (
+        !response.success ||
+        response.data.key.kid !== keyId ||
+        response.data.key.expired_at !== null ||
+        response.data.key.created_at > Date.now() / 1000
+      ) {
+        // A provider-confirmed invalid key loses trusted refresh eligibility.
+        // Transport failures skip this branch; stale keys are still never served.
+        this.entries.delete(keyId)
         throw new Error('Invalid webhook key.')
+      }
+      const key = response.data.key
       this.failures.delete(keyId)
       this.remember(keyId, key)
       return key

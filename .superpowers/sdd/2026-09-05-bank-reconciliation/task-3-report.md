@@ -91,3 +91,23 @@ Verification:
 - `npm exec -- playwright test`: **22/22 passed** in 25.7s against the production build using only the approved local fixture servers.
 
 All changed source/tests and the diff were inspected. No dependency, environment configuration, SQL, live database, Plaid account, Vault backend or deployment was touched. Previously recorded database/provider deployment verification gaps remain unchanged.
+
+## Review fix round 3
+
+Confirmed-invalid provider keys now lose their positive-cache membership and trusted refresh-budget eligibility. A successfully returned response with revoked/expired metadata, a mismatched key ID, invalid schema or future creation time removes the established entry before recording the bounded negative cooldown. Subsequent requests use discovery capacity. A thrown provider/network/5xx failure preserves the established identity for recovery, but never returns stale key material. Signature verification and cheap pre-lookup checks are unchanged.
+
+The reproduced regression failed before the fix: seven warm old keys plus one legitimate key reached their positive TTL; seven old-key refreshes confirmed revocation; after the failure cooldown, another forged old-key delivery spent the last refresh request and prevented the legitimate key from refreshing. The test uses canonical 64-byte garbage signatures: malformed encoding/length is rejected before lookup, but structurally plausible signature bytes necessarily require a key before ES256 can reject them. Every forged delivery remains rejected; the valid signed delivery now succeeds because confirmed-revoked keys no longer repeatedly spend trusted capacity.
+
+Additional tests prove a transient provider failure rejects the delivery yet preserves its reserved refresh path even after eight unknown IDs exhaust discovery, and successful malformed/mismatched key responses are demoted. Existing rotation, TTL, revocation, concurrency and negative-cache tests remain intact. Gateway-level aggregate controls and the bounded TTL revocation delay documented above still apply; no external rate-control configuration was added.
+
+Files changed: `plaid-webhook-key-cache.ts`, its tests, verifier regression tests and this report. The implementation change is limited to invalidation after a successful provider response; no dependency, SQL, provider/Vault configuration or deployment changes were made.
+
+Verification:
+
+- Red: the new revoked-old-key verifier regression failed with the legitimate delivery rejected before the implementation change.
+- `npm test`: **372 passed** — web 105, API 192, repository 34, schemas 41; includes **26 passing cache/verifier tests**.
+- `npm run typecheck`, `npm run lint`, Prettier check for every changed TypeScript file and `git diff --check`: passed.
+- `npm run build`: passed, compiled in 635ms; **35/35 pages** generated.
+- `npm exec -- playwright test`: **22/22 passed** in 21.6s against the production build using only approved loopback fixture servers.
+
+No live database/pgTAP, Plaid, Vault or deployment checks were run, as required. Previously recorded release gates remain unchanged. Changed files and the diff were re-inspected for typing, security boundaries, formatting and scope.

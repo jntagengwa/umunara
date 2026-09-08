@@ -125,3 +125,29 @@ it('accepts a valid delivery after eight unknown IDs exhaust discovery following
     f.provider.getWebhookVerificationKey.mock.calls.filter(([kid]) => kid === 'key')
   ).toHaveLength(2)
 })
+it('demotes confirmed revoked keys so malformed signatures cannot drain trusted refresh capacity', async () => {
+  vi.useFakeTimers()
+  const f = fixture()
+  const validKey = await f.provider.getWebhookVerificationKey()
+  let revoked = false
+  f.provider.getWebhookVerificationKey.mockClear().mockImplementation(async (kid: string) => ({
+    key: { ...validKey.key, kid, expired_at: revoked && kid !== 'key' ? now : null },
+  }))
+  const forged = Array.from({ length: 7 }, (_, index) => {
+    const token = fixture({}, { kid: `old-${index}` })
+      .headers.get('plaid-verification')!
+      .split('.')
+    // Canonical 64-byte garbage passes cheap structure checks and triggers key lookup,
+    // but must always fail the actual ES256 signature verification.
+    token[2] = Buffer.alloc(64).toString('base64url')
+    return new Headers({ 'plaid-verification': token.join('.') })
+  })
+  for (const headers of forged) await expect(f.verifier.verify(headers, body)).rejects.toThrow()
+  const expected = await f.verifier.verify(f.headers, body)
+  vi.advanceTimersByTime(60_001)
+  revoked = true
+  for (const headers of forged) await expect(f.verifier.verify(headers, body)).rejects.toThrow()
+  vi.advanceTimersByTime(10_001)
+  await expect(f.verifier.verify(forged[0]!, body)).rejects.toThrow()
+  expect(await f.verifier.verify(f.headers, body)).toEqual(expected)
+})

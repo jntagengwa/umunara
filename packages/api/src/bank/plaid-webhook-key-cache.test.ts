@@ -108,3 +108,44 @@ it('reserves a trusted-key refresh slot while all discovery slots are occupied',
     await Promise.all(unknown)
   }
 })
+it('retains trusted refresh eligibility after a transient failure without serving stale keys', async () => {
+  vi.useFakeTimers()
+  const cache = new PlaidWebhookKeyCache()
+  let unavailable = false
+  const provider = {
+    getWebhookVerificationKey: vi.fn(async (kid: string) => {
+      if (unavailable || kid !== 'trusted') throw new Error('Temporary provider failure')
+      return key(kid)
+    }),
+  }
+  await cache.get(provider, 'trusted')
+  vi.advanceTimersByTime(60_001)
+  unavailable = true
+  await expect(cache.get(provider, 'trusted')).rejects.toThrow('Webhook key unavailable.')
+  for (let index = 0; index < 8; index++)
+    await expect(cache.get(provider, `unknown-${index}`)).rejects.toThrow()
+  vi.advanceTimersByTime(10_001)
+  unavailable = false
+  expect((await cache.get(provider, 'trusted')).kid).toBe('trusted')
+})
+it.each([undefined, key('different-id')])(
+  'demotes a successfully returned invalid key response: %j',
+  async (invalidResponse) => {
+    vi.useFakeTimers()
+    const cache = new PlaidWebhookKeyCache()
+    const provider = {
+      getWebhookVerificationKey: vi.fn().mockResolvedValueOnce(key('old')),
+    }
+    await cache.get(provider, 'old')
+    vi.advanceTimersByTime(60_001)
+    provider.getWebhookVerificationKey.mockResolvedValue(invalidResponse)
+    await expect(cache.get(provider, 'old')).rejects.toThrow('Webhook key unavailable.')
+    for (let index = 0; index < 8; index++)
+      await expect(cache.get(provider, `unknown-${index}`)).rejects.toThrow()
+    vi.advanceTimersByTime(10_001)
+    await expect(cache.get(provider, 'old')).rejects.toThrow(
+      'Webhook key lookup capacity exceeded.'
+    )
+    expect(provider.getWebhookVerificationKey).toHaveBeenCalledTimes(10)
+  }
+)
