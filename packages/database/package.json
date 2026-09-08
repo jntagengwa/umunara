@@ -1,0 +1,25 @@
+{
+  "name": "@umunara/database",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./proxy": "./src/proxy.ts",
+    "./public": "./src/public.ts",
+    "./admin": "./src/admin.ts",
+    "./repositories": "./src/repositories/server.ts"
+  },
+  "scripts": {
+    "test": "vitest run src/**/*.test.ts",
+    "typecheck": "tsc --noEmit --strict --skipLibCheck --target ES2022 --module esnext --moduleResolution bundler src/*.ts src/repositories/*.ts"
+  },
+  "dependencies": {
+    "@umunara/schemas": "0.1.0",
+    "@supabase/ssr": "0.6.1",
+    "@supabase/supabase-js": "2.49.1"
+  },
+  "peerDependencies": {
+    "next": "^16.3.4"
+  }
+}

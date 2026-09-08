@@ -1,0 +1,1 @@
+-- Production-like seed data is intentionally omitted. Development users are created through Supabase Auth.

@@ -1,0 +1,47 @@
+{
+  "waiting": {
+    "accounts": [],
+    "added": [],
+    "modified": [],
+    "removed": [],
+    "next_cursor": "",
+    "has_more": false,
+    "transactions_update_status": "NOT_READY",
+    "request_id": "waiting-fixture"
+  },
+  "initial": {
+    "added": [
+      {
+        "transaction_id": "credit-1",
+        "account_id": "selected-account",
+        "amount": -15.25,
+        "iso_currency_code": "USD",
+        "date": "2026-09-01",
+        "name": "Business credit",
+        "pending": false
+      }
+    ],
+    "modified": [],
+    "removed": [],
+    "next_cursor": "cursor-1",
+    "has_more": true
+  },
+  "incremental": {
+    "added": [],
+    "modified": [
+      {
+        "transaction_id": "credit-1",
+        "account_id": "selected-account",
+        "amount": -16.25,
+        "iso_currency_code": "USD",
+        "date": "2026-09-01",
+        "name": "Corrected credit",
+        "pending": false
+      }
+    ],
+    "removed": [{ "transaction_id": "removed-1", "account_id": "selected-account" }],
+    "next_cursor": "cursor-2",
+    "has_more": false
+  },
+  "disconnected": { "error_code": "INVALID_ACCESS_TOKEN" }
+}
