@@ -26,6 +26,8 @@ export interface Database {
     }
     Views: Record<string, never>
     Functions: {
+      save_bank_sync_page: { Args: { page_input: Json }; Returns: Json }
+      link_bank_reconciliation: { Args: { link_input: Json }; Returns: Json }
       donation_report: {
         Args: { report_from: string; report_to: string; report_currency: string }
         Returns: Json
