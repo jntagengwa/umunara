@@ -1,4 +1,5 @@
 import { createHmac } from 'node:crypto'
+import { recordReportingFixture } from './donation-reporting.mjs'
 
 const custom = 'umunara:v1:11111111-1111-4111-8111-111111111111:2500:USD:one_time'
 const amount = (value) => ({ value, currency_code: 'USD' })
@@ -169,6 +170,7 @@ export function ingestPayPalFixture(body, request, response) {
       : 'applied'
   seen.add(event.providerEventId)
   if (outcome === 'applied') {
+    recordReportingFixture(event)
     projections.set(event.providerReference, event)
     applications++
   }

@@ -26,6 +26,10 @@ export interface Database {
     }
     Views: Record<string, never>
     Functions: {
+      donation_report: {
+        Args: { report_from: string; report_to: string; report_currency: string }
+        Returns: Json
+      }
       ingest_donation_event: {
         Args: { event_input: Json }
         Returns: Json

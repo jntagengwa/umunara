@@ -1,3 +1,5 @@
+import { recordReportingFixture } from './donation-reporting.mjs'
+
 const seenEvents = new Set()
 let applications = 0
 
@@ -75,7 +77,10 @@ export function ingestDonationFixture(body, request, response) {
   }
   const outcome = seenEvents.has(event.providerEventId) ? 'duplicate' : 'applied'
   seenEvents.add(event.providerEventId)
-  if (outcome === 'applied') applications += 1
+  if (outcome === 'applied') {
+    applications += 1
+    recordReportingFixture(event)
+  }
   response.end(
     JSON.stringify({
       outcome,
