@@ -26,6 +26,8 @@ export interface Database {
     }
     Views: Record<string, never>
     Functions: {
+      list_bank_transactions: { Args: { actor_id: string; query_input: Json }; Returns: Json }
+      classify_bank_transaction: { Args: { classification_input: Json }; Returns: Json }
       claim_bank_sync: { Args: { connection: string; lease: string }; Returns: Json }
       bind_bank_sync_item: { Args: { connection: string; lease: string; fingerprint: string }; Returns: Json }
       save_bank_worker_page: { Args: { worker_input: Json }; Returns: Json }

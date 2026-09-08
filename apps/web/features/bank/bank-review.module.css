@@ -1,0 +1,90 @@
+.review {
+  max-width: 85rem;
+  min-width: 0;
+  margin-top: 2rem;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+}
+.filters label,
+.editor label {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.filters label {
+  flex: 1 1 10rem;
+}
+.filters input,
+.filters select,
+.editor select,
+.editor textarea {
+  font: inherit;
+  padding: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #777;
+  border-radius: 0.25rem;
+}
+.editor {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+}
+.editor fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.editor textarea {
+  min-height: 7rem;
+}
+.editor .confirm {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.tableScroll {
+  overflow-x: auto;
+  max-width: 100%;
+  margin-top: 1rem;
+}
+.tableScroll:focus-visible {
+  outline: 2px solid #004e7c;
+  outline-offset: 2px;
+}
+.tableScroll table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.tableScroll th,
+.tableScroll td {
+  padding: 0.65rem;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+.tableScroll td {
+  min-width: 8rem;
+}
+.tableScroll small {
+  display: block;
+  overflow-wrap: anywhere;
+  max-width: 16rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.review button:disabled {
+  opacity: 0.7;
+}
