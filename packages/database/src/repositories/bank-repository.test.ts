@@ -48,6 +48,35 @@ function fixture(body: unknown, status = 200) {
 }
 
 describe('bank repositories', () => {
+  it('creates the connection through one validated RPC without token material', async () => {
+    const dto = { id, institutionName: 'Bank', status: 'active', lastSyncedAt: null }
+    const input = {
+      connectionId: id,
+      actorId: id,
+      secretReference: id,
+      institutionName: 'Bank',
+      accounts: [
+        {
+          providerAccountId: 'a1',
+          name: 'Checking',
+          mask: '1234',
+          type: 'depository' as const,
+          subtype: 'checking' as const,
+          currency: 'USD',
+        },
+      ],
+    }
+    const { bank, fetch } = fixture(dto)
+    expect(await bank.createConnection(input)).toEqual(dto)
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(String(fetch.mock.calls[0]?.[0])).toContain('/rpc/create_bank_connection')
+    expect(JSON.parse(String(fetch.mock.calls[0]?.[1]?.body))).toEqual({ connection_input: input })
+    await expect(bank.createConnection({ ...input, accounts: [] })).rejects.toThrow()
+    expect(fetch).toHaveBeenCalledTimes(1)
+    await expect(
+      fixture({ ...dto, accessToken: 'private' }).bank.createConnection(input)
+    ).rejects.toThrow()
+  })
   it('sends all page changes and the expected cursor through one atomic RPC', async () => {
     const result = { outcome: 'applied', added: 1, modified: 0, removed: 0 }
     const { bank, fetch } = fixture(result)

@@ -13,6 +13,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <Link href="/account">Account</Link>
         {actor.role === 'admin' && <Link href="/admin/members">Member approvals</Link>}
         {actor.role === 'admin' && <Link href="/admin/donations">Donation reporting</Link>}
+        {actor.role === 'admin' && <Link href="/admin/bank">Bank accounts</Link>}
       </nav>
       {children}
     </>

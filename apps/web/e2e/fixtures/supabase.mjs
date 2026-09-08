@@ -3,6 +3,7 @@ import { handleAuth } from './auth.mjs'
 import { handleStripeFixture, ingestDonationFixture } from './stripe.mjs'
 import { handlePayPalFixture, ingestPayPalFixture } from './paypal.mjs'
 import { handleReportingControl, reportFixture } from './donation-reporting.mjs'
+import { handleBankFixture } from './bank.mjs'
 
 // Loopback-only external Auth/PostgREST fixture. Application routes, services and caching stay real.
 let hero = null
@@ -14,6 +15,7 @@ let paginatedApprovals = false
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? '/', 'http://127.0.0.1:55431')
   response.setHeader('Content-Type', 'application/json')
+  if (await handleBankFixture(request, response, url)) return
   if (handleReportingControl(request, response, url)) return
   if (await handleStripeFixture(request, response, url)) return
   if (await handlePayPalFixture(request, response, url)) return
