@@ -12,6 +12,7 @@ const links = [
   ['/blog', 'Blog'],
   ['/give', 'Donate'],
   ['/about-us', 'About Us'],
+  ['/history', 'History'],
   ['/member', 'Members'],
   ['/account', 'Account'],
 ] as const
