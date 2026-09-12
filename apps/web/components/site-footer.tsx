@@ -1,15 +1,18 @@
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <section>
+      <section className="footer-vision">
+        <p className="section-label">Our vision</p>
         <h2>Our Vision</h2>
         <p>
-          We hope to build a strong and God-fearing community that is a beacon of everlasting peace
-          and unity, rooted in Jesus and held together by faith and the Holy Spirit.
+          We hope to build a Strong and God-fearing Community that will be the beacon of ever
+          lasting peace and unity in our region, rooted in Jesus and held together by Faith and the
+          Holy Spirit.
         </p>
-        <p>We hope to spread the good news of our Lord’s resurrection and prepare all nations.</p>
+        <p>We hope to spread the good news of our Lord’s resurrection and prepare all nations for his return.</p>
       </section>
-      <section>
+      <section className="footer-contact">
+        <p className="section-label">Keep in touch</p>
         <h2>Contact Us</h2>
         <address>
           <a href="mailto:postmaster@umunara.org">postmaster@umunara.org</a>

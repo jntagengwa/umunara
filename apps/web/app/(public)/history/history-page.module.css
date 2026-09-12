@@ -1,0 +1,176 @@
+.hero {
+  background: var(--ink);
+  color: white;
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+.hero h1 {
+  color: white;
+  margin: 0;
+}
+
+.eyebrow {
+  color: #dceeff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  background: #a9d38e;
+  border-radius: 50%;
+  content: '';
+  display: inline-block;
+  height: 0.5rem;
+  margin: 0 0.55rem 0.05rem 0;
+  width: 0.5rem;
+}
+
+.content {
+  padding-bottom: clamp(3.5rem, 8vw, 6rem);
+}
+
+.milestones {
+  align-items: center;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  box-shadow: 0 1rem 2.25rem -1.75rem rgb(18 32 51 / 40%);
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(11rem, 0.6fr) minmax(0, 2fr);
+  margin-top: -2rem;
+  padding: clamp(1.5rem, 4vw, 2rem);
+  position: relative;
+}
+
+.milestones h2 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.milestones ol {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.milestones li {
+  border-left: 2px solid var(--green);
+  display: grid;
+  gap: 0.25rem;
+  padding-left: 0.8rem;
+}
+
+.milestones time {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.milestones span,
+.article {
+  color: var(--muted);
+}
+
+.milestones span {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.article {
+  column-count: 2;
+  column-gap: clamp(2.5rem, 6vw, 5rem);
+  line-height: 1.8;
+  margin: clamp(3rem, 7vw, 5rem) auto 0;
+  max-width: 70rem;
+}
+
+.article p {
+  break-inside: avoid;
+  margin-bottom: 1.65rem;
+}
+
+.article strong {
+  color: var(--ink);
+}
+
+.supporting {
+  align-items: stretch;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.5fr) minmax(14rem, 0.5fr);
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+
+.prayerWatch {
+  background: var(--blue);
+  border-radius: 1.75rem;
+  color: white;
+  padding: clamp(1.75rem, 5vw, 2.5rem);
+}
+
+.prayerWatch h2 {
+  color: white;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+.prayerWatch dl {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 2rem 0 0;
+}
+
+.prayerWatch dt {
+  color: #dceeff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prayerWatch dd {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0.35rem 0 0;
+}
+
+.mark {
+  align-items: center;
+  background: #edf4f0;
+  border-radius: 1.75rem;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  min-height: 13rem;
+  padding: 2rem;
+}
+
+.mark img {
+  height: auto;
+  max-width: 12rem;
+  width: 100%;
+}
+
+@media (max-width: 800px) {
+  .milestones,
+  .supporting {
+    grid-template-columns: 1fr;
+  }
+
+  .milestones ol,
+  .prayerWatch dl {
+    grid-template-columns: 1fr;
+  }
+
+  .article {
+    column-count: 1;
+  }
+}

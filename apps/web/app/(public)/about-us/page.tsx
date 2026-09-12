@@ -4,8 +4,11 @@ import conference from '../../../../../src/about.jpeg'
 export default function AboutPage() {
   return (
     <main className="page-content" id="main-content">
-      <h1>About Us</h1>
-      <div className="welcome-content">
+      <header className="page-introduction">
+        <p className="section-label">About Umunara</p>
+        <h1>About Us</h1>
+      </header>
+      <div className="about-content">
         <div>
           <p>
             As Prophet Habakkuk asserted in his second chapter verse 1 saying, “I will stand at my
@@ -33,8 +36,9 @@ export default function AboutPage() {
           className="about-image"
           src={conference}
           alt="Umunara Conference"
-          width={600}
-          height={800}
+          width={1024}
+          height={768}
+          priority
         />
       </div>
     </main>

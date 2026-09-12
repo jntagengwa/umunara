@@ -1,0 +1,737 @@
+.public-site {
+  --ink: #122033;
+  --muted: #586679;
+  --line: #d8e0e8;
+  --paper: #fffdf9;
+  --mist: #f2f6f5;
+  --blue: #1554a3;
+  --blue-pressed: #0c417f;
+  --green: #6b9e59;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+.public-site :is(h1, h2, h3, p) {
+  margin-top: 0;
+}
+
+.public-site h1,
+.public-site h2,
+.public-site h3 {
+  color: var(--ink);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.public-site h1 {
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+}
+
+.public-site h2 {
+  font-size: clamp(2rem, 3.8vw, 3rem);
+}
+
+.public-site a {
+  color: var(--blue);
+}
+
+.public-site .content-shell,
+.public-site .page-content {
+  margin-inline: auto;
+  max-width: 76rem;
+  padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.public-site .section-label {
+  color: var(--blue);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+}
+
+.public-site .section-label::before {
+  background: var(--green);
+  border-radius: 50%;
+  content: '';
+  display: inline-block;
+  height: 0.5rem;
+  margin: 0 0.55rem 0.05rem 0;
+  width: 0.5rem;
+}
+
+.public-site .skip-link {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.public-site .site-header {
+  background: rgb(255 253 249 / 94%);
+  border-bottom: 1px solid rgb(18 32 51 / 10%);
+  box-shadow: none;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(8rem, 12rem) 1fr auto;
+  margin: 0;
+  padding: 0.8rem clamp(1.25rem, 4vw, 2.5rem);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .public-site .site-header {
+    backdrop-filter: blur(18px);
+  }
+}
+
+.public-site .site-logo {
+  align-self: center;
+}
+
+.public-site .site-logo img {
+  max-width: 10.5rem;
+  width: 100%;
+}
+
+.public-site .site-navigation {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.public-site .site-menu {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  justify-content: center;
+}
+
+.public-site .site-menu a {
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.7rem 0.85rem;
+  text-decoration: none;
+}
+
+.public-site .site-menu a:hover,
+.public-site .site-menu a[aria-current='page'] {
+  background: #e9eff3;
+  color: var(--blue-pressed);
+}
+
+.public-site .menu-toggle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  display: none;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.9rem;
+}
+
+.public-site .menu-toggle:hover,
+.public-site .menu-toggle:focus-visible {
+  background: #e9eff3;
+  color: var(--ink);
+}
+
+.public-site .menu-toggle-icon,
+.public-site .menu-toggle-icon::before,
+.public-site .menu-toggle-icon::after {
+  background: currentcolor;
+  display: block;
+  height: 2px;
+  position: relative;
+  width: 1rem;
+}
+
+.public-site .menu-toggle-icon::before,
+.public-site .menu-toggle-icon::after {
+  content: '';
+  left: 0;
+  position: absolute;
+}
+
+.public-site .menu-toggle-icon::before {
+  top: -0.3rem;
+}
+
+.public-site .menu-toggle-icon::after {
+  top: 0.3rem;
+}
+
+.public-site .header-give,
+.public-site .button {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.65rem 1.1rem;
+  text-decoration: none;
+}
+
+.public-site .header-give,
+.public-site .button-primary {
+  background: var(--blue);
+  color: white;
+}
+
+.public-site .header-give:hover,
+.public-site .button-primary:hover {
+  background: var(--blue-pressed);
+  color: white;
+}
+
+.public-site .button-secondary {
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.public-site .button-secondary:hover {
+  background: #e9eff3;
+  color: var(--ink);
+}
+
+.public-site .home-hero {
+  align-items: center;
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 5rem);
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.88fr);
+  min-height: 38rem;
+  padding-block: clamp(3.5rem, 9vw, 7rem);
+}
+
+.public-site .home-hero-copy h1 {
+  margin-bottom: 1.25rem;
+  max-width: 40rem;
+}
+
+.public-site .hero-introduction {
+  color: var(--muted);
+  font-size: 1.15rem;
+  line-height: 1.65;
+  margin-bottom: 1.8rem;
+  max-width: 36rem;
+}
+
+.public-site .action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.public-site .home-hero-image {
+  min-height: 25rem;
+  position: relative;
+}
+
+.public-site .home-hero-image img {
+  border-radius: 2rem;
+  box-shadow: 0 1.25rem 3rem -1.8rem rgb(18 32 51 / 45%);
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  width: 100%;
+}
+
+.public-site .image-caption {
+  background: white;
+  border-radius: 999px;
+  bottom: 1.25rem;
+  box-shadow: 0 0.75rem 1.75rem -1rem rgb(18 32 51 / 35%);
+  font-size: 0.83rem;
+  font-weight: 700;
+  left: -1rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  position: absolute;
+}
+
+.public-site .mission-section,
+.public-site .home-about,
+.public-site .conference-section {
+  align-items: center;
+  display: grid;
+  gap: clamp(2rem, 6vw, 4.5rem);
+  grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+.public-site .reading-copy {
+  color: var(--muted);
+  line-height: 1.75;
+  max-width: 46rem;
+}
+
+.public-site .mission-note {
+  align-self: stretch;
+  background: #edf4f0;
+  border-radius: 1.75rem;
+  display: grid;
+  padding: 2rem;
+  place-content: center;
+}
+
+.public-site .mission-note p:last-child {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.public-site .text-link {
+  color: var(--blue);
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  text-decoration: none;
+}
+
+.public-site .text-link:hover {
+  color: var(--blue-pressed);
+  text-decoration: underline;
+}
+
+.public-site .home-about {
+  grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1fr);
+}
+
+.public-site .home-about img,
+.public-site .conference-section img,
+.public-site .about-image {
+  border-radius: 1.75rem;
+  box-shadow: 0 1rem 2.5rem -1.8rem rgb(18 32 51 / 45%);
+  height: auto;
+  max-width: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.public-site .prayer-watch {
+  background: var(--blue);
+  border-radius: 2rem;
+  color: white;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.75fr);
+  margin-bottom: clamp(3.5rem, 8vw, 6rem);
+  overflow: hidden;
+  padding-block: 0;
+  padding-right: 0;
+}
+
+.public-site .prayer-watch > div:first-child {
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+}
+
+.public-site .prayer-watch h2 {
+  color: white;
+  margin-bottom: 0.75rem;
+}
+
+.public-site .prayer-watch .section-label {
+  color: #dceeff;
+}
+
+.public-site .prayer-watch .section-label::before {
+  background: #a9d38e;
+}
+
+.public-site .prayer-details,
+.public-site .weekly-watch dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
+}
+
+.public-site .prayer-details div {
+  background: rgb(255 255 255 / 14%);
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.public-site dt {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.public-site dd {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0.2rem 0 0;
+}
+
+.public-site .prayer-watch a {
+  color: white;
+}
+
+.public-site .prayer-watch-image {
+  background: linear-gradient(rgb(18 32 51 / 18%), rgb(18 32 51 / 18%)), url('../../../src/images/image_1.jpg') center / cover;
+  min-height: 19rem;
+}
+
+.public-site .conference-section {
+  grid-template-columns: minmax(14rem, 0.65fr) minmax(0, 1fr);
+}
+
+.public-site .conference-section img {
+  max-height: 29rem;
+}
+
+.public-site .podcast-section {
+  background: #eaf3ee;
+  border-radius: 2rem;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.85fr);
+  margin-bottom: clamp(3.5rem, 8vw, 6rem);
+  padding-block: clamp(2rem, 5vw, 3.5rem);
+}
+
+.public-site .podcast-section h2 {
+  margin-bottom: 1.5rem;
+}
+
+.public-site .podcast-embed {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  height: 22rem;
+  width: 100%;
+}
+
+.public-site .page-content {
+  min-height: 56vh;
+  padding-block: clamp(3rem, 7vw, 5.5rem);
+}
+
+.public-site .page-introduction {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  max-width: 48rem;
+  padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.public-site .page-introduction h1 {
+  margin-bottom: 0;
+}
+
+.public-site .page-introduction > p:last-child:not(.section-label) {
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1.65;
+  margin: 1.15rem 0 0;
+}
+
+.public-site .about-content,
+.public-site .giving-layout,
+.public-site .events-layout {
+  align-items: start;
+  display: grid;
+  gap: clamp(2rem, 6vw, 4.5rem);
+  grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
+}
+
+.public-site .about-content > div,
+.public-site .giving-copy {
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.public-site .giving-actions {
+  background: #f2f6f5;
+  border-radius: 1.5rem;
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.public-site .content-form {
+  max-width: none;
+}
+
+.public-site .content-form fieldset {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  gap: 0.7rem;
+}
+
+.public-site .content-form legend {
+  color: var(--ink);
+  font-weight: 700;
+  padding-inline: 0.35rem;
+}
+
+.public-site .content-form input,
+.public-site .content-form select,
+.public-site .content-form textarea {
+  border-color: #aebaca;
+  border-radius: 0.6rem;
+}
+
+.public-site .content-form button,
+.public-site button {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+  min-height: 2.75rem;
+}
+
+.public-site .content-form button:hover,
+.public-site .content-form button:focus-visible,
+.public-site button:hover,
+.public-site button:focus-visible {
+  background: var(--blue-pressed);
+  color: white;
+}
+
+.public-site .post-grid,
+.public-site .event-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.public-site .post-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.public-site .content-card,
+.public-site .event-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  box-shadow: 0 0.85rem 2rem -1.8rem rgb(18 32 51 / 35%);
+}
+
+.public-site .content-card {
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.public-site .content-card h2,
+.public-site .event-card h2 {
+  font-size: 1.35rem;
+  margin-bottom: 0.7rem;
+}
+
+.public-site .event-card {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 4.5rem 1fr;
+  padding: 1.25rem;
+}
+
+.public-site .event-date {
+  background: #edf4f0;
+  border-radius: 0.85rem;
+  color: var(--blue-pressed);
+  display: grid;
+  height: 4.5rem;
+  place-content: center;
+  text-align: center;
+}
+
+.public-site .event-date span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.public-site .event-date strong {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.public-site .event-time {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.public-site .weekly-watch {
+  background: var(--ink);
+  border-radius: 1.5rem;
+  color: white;
+  padding: 1.75rem;
+  position: sticky;
+  top: 6rem;
+}
+
+.public-site .weekly-watch h2 {
+  color: white;
+  font-size: 1.75rem;
+}
+
+.public-site .weekly-watch .section-label {
+  color: #dceeff;
+}
+
+.public-site .weekly-watch a {
+  color: white;
+}
+
+.public-site .weekly-watch dl {
+  display: grid;
+}
+
+.public-site .weekly-watch dl div {
+  border-top: 1px solid rgb(255 255 255 / 20%);
+  padding-top: 0.85rem;
+}
+
+.public-site .pagination {
+  gap: 0.5rem;
+}
+
+.public-site .pagination a {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 0.55rem 0.85rem;
+  text-decoration: none;
+}
+
+.public-site .site-footer {
+  background: #122033;
+  color: #dce4ec;
+  gap: clamp(2rem, 8vw, 5rem);
+  grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.9fr);
+  padding-block: clamp(3rem, 7vw, 5rem) 1.5rem;
+}
+
+.public-site .site-footer h2 {
+  color: white;
+  font-size: 1.3rem;
+}
+
+.public-site .site-footer .section-label {
+  color: #9ec7ff;
+}
+
+.public-site .site-footer a {
+  color: white;
+}
+
+@media (max-width: 940px) {
+  .public-site .site-header {
+    grid-template-columns: minmax(8rem, 12rem) 1fr auto;
+  }
+
+  .public-site .site-navigation {
+    justify-content: flex-end;
+  }
+
+  .public-site .menu-toggle {
+    display: inline-flex;
+  }
+
+  .public-site .site-menu {
+    align-items: stretch;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    box-shadow: 0 1rem 2rem -1.5rem rgb(18 32 51 / 35%);
+    display: none;
+    min-width: 13rem;
+    padding: 0.5rem;
+    position: absolute;
+    right: 1.25rem;
+    text-align: left;
+    top: 4.3rem;
+  }
+
+  .public-site .site-menu.is-open {
+    display: grid;
+  }
+
+  .public-site .site-menu a {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .public-site .home-hero,
+  .public-site .mission-section,
+  .public-site .home-about,
+  .public-site .conference-section,
+  .public-site .podcast-section,
+  .public-site .about-content,
+  .public-site .giving-layout,
+  .public-site .events-layout,
+  .public-site .site-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .public-site .home-hero-image {
+    min-height: 20rem;
+  }
+
+  .public-site .image-caption {
+    left: 1rem;
+  }
+
+  .public-site .prayer-watch {
+    grid-template-columns: 1fr;
+    padding-right: clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  .public-site .prayer-watch-image {
+    display: none;
+  }
+
+  .public-site .weekly-watch {
+    position: static;
+  }
+}
+
+@media (max-width: 580px) {
+  .public-site .site-header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .public-site .site-navigation {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+
+  .public-site .site-menu {
+    left: 1.25rem;
+    right: 1.25rem;
+    top: 7.3rem;
+  }
+
+  .public-site .post-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-site .podcast-embed {
+    height: 18rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-site *,
+  .public-site *::before,
+  .public-site *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
+  }
+}
