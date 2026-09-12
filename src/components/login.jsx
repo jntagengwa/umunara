@@ -35,7 +35,7 @@ export class Login extends Form {
 
     return (
       <div className="inner-container">
-        <div className="header">Login</div>
+        <div className="header">Sign in to your account</div>
         <div className="box">
           <div className="l-form">
             <div className="form-set">

@@ -1,0 +1,223 @@
+.history-page {
+  color: #1e293b;
+  padding-bottom: 96px;
+}
+
+.history-page__shell {
+  margin: 0 auto;
+  max-width: 1280px;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+.history-page__title-band {
+  background: #101e33;
+  padding: 72px 0 88px;
+}
+
+.history-page__eyebrow {
+  color: #93c5fd;
+  font: 700 11px "Space Grotesk", sans-serif;
+  letter-spacing: 0.1em;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+}
+
+.history-page__title-band h1 {
+  color: #fff;
+  font-size: clamp(44px, 5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.history-page__milestones {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  box-shadow: 0 18px 36px -28px rgba(16, 30, 51, 0.38);
+  display: grid;
+  gap: 32px;
+  grid-template-columns: minmax(180px, 0.6fr) minmax(0, 2fr);
+  margin-top: -32px;
+  padding: 28px 32px;
+  position: relative;
+}
+
+.history-page__milestones h2 {
+  color: #101e33;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.history-page__milestones ol {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.history-page__milestones li {
+  border-left: 2px solid #75b259;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-left: 14px;
+}
+
+.history-page__milestones time {
+  color: #1d52b8;
+  font: 700 13px "Space Grotesk", sans-serif;
+}
+
+.history-page__milestones span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.history-page__article {
+  column-count: 2;
+  column-gap: clamp(48px, 6vw, 80px);
+  margin: 72px auto 0;
+  max-width: 1120px;
+}
+
+.history-page__article p {
+  break-inside: avoid;
+  color: #475569;
+  font-size: 16px;
+  line-height: 1.85;
+  margin: 0 0 28px;
+}
+
+.history-page__article strong {
+  color: #101e33;
+  font-weight: 700;
+}
+
+.history-page__supporting {
+  align-items: stretch;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(240px, 0.5fr);
+  margin-top: 52px;
+}
+
+.history-page__prayer-watch {
+  background: #164096;
+  border-radius: 28px;
+  color: #fff;
+  padding: 40px;
+}
+
+.history-page__eyebrow--light {
+  color: #dbeafe;
+}
+
+.history-page__prayer-watch h2 {
+  color: #fff;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.history-page__prayer-watch dl {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 32px 0 0;
+}
+
+.history-page__prayer-watch dt {
+  color: #bfdbfe;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
+
+.history-page__prayer-watch dd {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.history-page__mark {
+  align-items: center;
+  background: #f4f2fa;
+  border-radius: 28px;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  min-height: 240px;
+  padding: 32px;
+}
+
+.history-page__mark img {
+  display: block;
+  height: auto;
+  max-width: 190px;
+  width: 72%;
+}
+
+@media (max-width: 800px) {
+  .history-page {
+    padding-bottom: 64px;
+  }
+
+  .history-page__shell {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .history-page__title-band {
+    padding: 48px 0 64px;
+  }
+
+  .history-page__milestones {
+    align-items: start;
+    gap: 22px;
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+
+  .history-page__milestones ol {
+    gap: 18px;
+    grid-template-columns: 1fr;
+  }
+
+  .history-page__article {
+    column-count: 1;
+    margin-top: 52px;
+  }
+
+  .history-page__supporting {
+    grid-template-columns: 1fr;
+    margin-top: 36px;
+  }
+
+  .history-page__prayer-watch {
+    padding: 32px 28px;
+  }
+
+  .history-page__prayer-watch dl {
+    gap: 18px;
+    grid-template-columns: 1fr;
+  }
+
+  .history-page__mark {
+    min-height: 210px;
+  }
+}

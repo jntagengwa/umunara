@@ -1,150 +1,23 @@
-$grey_theme: #999;
-$dark_theme: #555;
-$blue_theme: #c8e4f1;
-
-.ui-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  margin-top: 4rem;
-}
-
-.box-controller {
-  visibility: visible;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  max-width: 24em;
-  min-width: 21em;
-  height: 35px;
-  -webkit-box-shadow: 0px 0px 20px 0px $grey_theme;
-  box-shadow: 0px 0px 20px 0px $grey_theme;
-  margin-bottom: 3rem;
-  align-items: center;
-  transition: visibility 0.5s ease-out;
-}
-
-.controller {
-  flex: 1;
-  //margin-bottom: 3rem;
-  text-align: center;
-  background-color: white;
-  height: 100%;
-  line-height: 2;
-  cursor: pointer;
-}
-
-.selected-controller {
-  transition: border 0.5s ease-out;
-  font-weight: bold;
-  border-bottom: 2px solid $blue_theme;
-}
-
-.box-container {
-  display: flex;
-  flex-direction: column;
-  margin-top: 2.5rem;
-  background-color: white;
-  max-width: 24em;
-  min-width: 21em;
-  box-shadow: 0px 0px 20px 0px $grey_theme;
-  border-radius: 6px;
-  padding: 24px;
-}
-
-.inner-container {
-  height: 100%;
-  transition: visibility 0.2s ease-out;
-}
-
-// .inner-container.show {
-//   visibility: visible;
-// }
-
-//Header
-.header {
-  text-align: center;
-  padding: 5px;
-  margin-top: 4rem;
-  margin-bottom: 4rem;
-  /* margin-left: 35px; */
-  /* margin-right: 35px; */
-  font-family: "Josefin Sans", sans-seriff;
-  //font-size: 2rem;
-  font-weight: bold;
-  border-bottom: 2px dotted $dark_theme;
-}
-
-.box {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.l-form {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  margin: 0;
-}
-
-.form-set {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  margin: 0;
-
-  input {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 2.1rem;
-    border-radius: 3px;
-    border: 1px solid $blue_theme;
-    transition: border 0.4s ease-out;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    font-family: Oxygen, sans-serif;
-    font-size: 12px;
-    color: #3e3e42;
-    background: rgba(15, 15, 15, 0.01);
-  }
-
-  .buttons {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    .l-con {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      .btns {
-        padding: 2px 30px;
-        /* background-color: #417cef; */
-        border: 0;
-        font-size: 18px;
-        border-radius: 12px;
-        font-family: Oxygen, sans-serif;
-        background-color: rgba(15, 15, 15, 0.03);
-        margin-top: 3rem;
-        margin-bottom: 2rem;
-        border: 2px solid $dark_theme;
-        transition: background-color 0.3s ease-out;
-        cursor: pointer;
-      }
-      .btns:hover,
-      .login-btn:focus {
-        background-color: $grey_theme;
-        color: white;
-      }
-    }
-  }
-}
+.member-access { border-radius: 28px; box-shadow: 0 24px 58px -40px rgba(16, 30, 51, .45); display: grid; gap: 0; grid-template-columns: minmax(320px, .82fr) minmax(430px, 1.18fr); margin: 72px auto 96px; max-width: 1060px; overflow: hidden; }
+.member-access__panel { background: linear-gradient(145deg, #0b1c30 0%, #164096 58%, #1d52b8 100%); color: #fff; padding: 56px 48px; }
+.member-access__panel .eyebrow { color: #b2c5ff; }
+.member-access__panel h1 { color: #fff; font-family: "Space Grotesk", sans-serif; font-size: clamp(32px, 3.5vw, 46px); font-weight: 700; letter-spacing: -.035em; line-height: 1.1; margin: 22px 0 34px; }
+.member-access__panel blockquote { background: rgba(255, 255, 255, .08); border-radius: 14px; color: #eaf1ff; font-family: "Space Grotesk", sans-serif; font-size: 16px; line-height: 1.5; margin: 0; padding: 20px; }
+.member-access__reference { color: #b2c5ff; font-size: 11px; font-weight: 700; letter-spacing: .07em; margin: 12px 0 28px; text-transform: uppercase; }
+.member-access__form { background: #fff; border: 0; box-shadow: 0 16px 36px -26px rgba(16, 30, 51, .3); padding: 52px; }
+.box-container { width: 100%; }
+.inner-container { height: 100%; }
+.header { border: 0; color: #101e33; font-family: "Space Grotesk", sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -.03em; line-height: 1.15; margin: 0 0 12px; padding: 0; text-align: left; }
+.header::after { color: #64748b; content: "Enter your details to continue to the fellowship."; display: block; font-family: "Plus Jakarta Sans", sans-serif; font-size: 13px; font-weight: 400; letter-spacing: 0; line-height: 1.55; margin-top: 10px; }
+.box, .l-form, .form-set { display: flex; flex-direction: column; }
+.form-set { margin-top: 28px; }
+.form-set input { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; color: #1e293b; font-family: "Plus Jakarta Sans", sans-serif; font-size: 14px; height: 52px; margin-bottom: 14px; padding: 0 14px; width: 100%; }
+.form-set input:focus { border-color: #1d52b8; box-shadow: 0 0 0 3px rgba(29, 82, 184, .15); outline: 0; }
+.buttons, .l-con { display: flex; }
+.l-con { margin-top: 12px; }
+.form-set .buttons .l-con .btns { background: #101e33; border: 0; border-radius: 999px; color: #fff; cursor: pointer; font-family: "Plus Jakarta Sans", sans-serif; font-size: 14px; font-weight: 700; min-height: 50px; padding: 0 24px; width: 100%; }
+.form-set .buttons .l-con .btns:hover { background: #1d52b8; }
+.box-controller { display: flex; gap: 8px; margin-top: 24px; }
+.controller { background: transparent; border: 0; color: #64748b; cursor: pointer; font-family: "Plus Jakarta Sans", sans-serif; font-size: 12px; font-weight: 700; padding: 0; }
+.selected-controller { color: #1d52b8; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 800px) { .member-access { grid-template-columns: 1fr; margin: 40px 20px 64px; } .member-access__panel, .member-access__form { padding: 34px 28px; } }

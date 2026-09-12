@@ -10,33 +10,70 @@ export default class MyCalendar extends Component {
     super(props);
     this.state = {
       events: [],
+      unavailable: false,
     };
   }
 
   componentDidMount() {
-    getEvents((events) => {
-      this.setState({ events });
-    });
+    getEvents(
+      (events) => this.setState({ events, unavailable: false }),
+      () => this.setState({ unavailable: true })
+    );
   }
 
   render() {
     return (
-      <div className="cal container">
-        <div className="head">
+      <div className="calendar-page">
+        <header className="calendar-page__header">
+          <p className="calendar-page__eyebrow">Gather with us</p>
           <h1>Upcoming Events</h1>
+          <p>
+            Explore upcoming gatherings, prayer watches, and community events.
+          </p>
+          <p className="calendar-page__orientation-note">
+            HOLD IN LANDSCAPE MODE
+          </p>
+        </header>
+
+        <div className="calendar-page__content">
+          <section
+            className="calendar-page__panel"
+            aria-label="Events calendar"
+          >
+            {this.state.unavailable ? (
+              <p role="alert">
+                The events calendar is currently unavailable. Please try again later.
+              </p>
+            ) : (
+              <Calendar
+                className="calendar"
+                localizer={localizer}
+                events={this.state.events}
+                views={["month", "agenda"]}
+                defaultView="agenda"
+                showMultiDayTimes
+              />
+            )}
+          </section>
+
+          <aside className="calendar-page__details">
+            <p className="calendar-page__details-label">Weekly prayer watch</p>
+            <h2>Join the live prayer line</h2>
+            <p>Friday at 10:00 PM Eastern Time</p>
+            <dl>
+              <div>
+                <dt>Dial-in number</dt>
+                <dd>
+                  <a href="tel:+12185480820">1-218-548-0820</a>
+                </dd>
+              </div>
+              <div>
+                <dt>Pass code</dt>
+                <dd>13579#</dd>
+              </div>
+            </dl>
+          </aside>
         </div>
-        <p className="hide">
-          <strong>HOLD IN LANDSCAPE MODE</strong>
-        </p>
-        <Calendar
-          className="calendar"
-          style={{ height: "600px" }}
-          localizer={localizer}
-          events={this.state.events}
-          views={["month", "agenda"]}
-          defaultView="agenda"
-          showMultiDayTimes
-        />
       </div>
     );
   }

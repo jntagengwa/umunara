@@ -1,63 +1,27 @@
-.blog {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  .top {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 30px 0;
-    h1 {
-      color: #007cc7;
-      font-family: "Alegreya Sans SC", sans-serif;
-      //margin: 1.5em 0;
-      //font-weight: 500;
-      width: 100%;
-      display: flex;
-    }
-  }
-  .button {
-    color: #007cc7;
-    #plus {
-      font-size: 24px;
-    }
-  }
-  .button:hover {
-    cursor: pointer;
-    transform: scale(1.1, 1.1);
-  }
-
-  .gb-white {
-    background: white;
-  }
-
-  .featured-posts-container {
-    display: flex;
-    width: 100%;
-  }
-
-  .pag {
-    margin-bottom: 30px;
-  }
-}
-
-.btn {
-  color: white;
-  background-color: rgb(255, 59, 48) !important;
-}
-
-@media screen and (max-width: 900px) {
-  .blog {
-    h1 {
-      margin-block-start: 1.5em;
-      margin-block-end: 1.5em;
-    }
-
-    .featured-posts-container {
-      flex-direction: column;
-    }
-  }
-}
+.reflections-page { padding: 72px 0 96px; }
+.reflections-shell { margin: 0 auto; max-width: 1280px; padding-left: 32px; padding-right: 32px; }
+.reflections-hero { margin: 0 auto; max-width: 830px; padding-bottom: 56px; text-align: center; }
+.reflections-hero .eyebrow { justify-content: center; }
+.reflections-hero h1, .reflections-featured h2, .reflections-publications h2 { color: #101e33; font-family: "Space Grotesk", sans-serif; font-size: clamp(40px, 5vw, 62px); font-weight: 700; letter-spacing: -.035em; line-height: 1.06; margin: 0; }
+.reflections-hero > p:not(.eyebrow) { color: #64748b; font-size: 16px; line-height: 1.7; margin: 20px auto 28px; max-width: 620px; }
+.reflections-featured { padding-bottom: 80px; }
+.featured-reflection { background: #ebf3fa; border: 1px solid rgba(29, 82, 184, .1); border-radius: 28px; overflow: hidden; }
+.featured-reflection__copy { padding: 42px; }
+.featured-reflection h2 { font-size: clamp(30px, 3.2vw, 43px); }
+.featured-reflection__copy > p:not(.eyebrow) { color: #475569; font-size: 15px; line-height: 1.7; }
+.featured-reflection__meta, .reflection-card footer { color: #64748b; display: flex; flex-wrap: wrap; font-size: 12px; gap: 7px; margin: 22px 0; }
+.reflections-publications { padding-bottom: 80px; }
+.reflections-publications__heading { align-items: end; display: flex; justify-content: space-between; margin-bottom: 30px; }
+.reflections-publications h2 { font-size: clamp(30px, 3.2vw, 43px); }
+.new-reflection { align-items: center; background: #1d52b8; border-radius: 999px; color: #fff !important; display: inline-flex; font-size: 13px; font-weight: 700; gap: 8px; padding: 12px 16px; text-decoration: none; }
+.reflection-grid { display: grid; gap: 18px; grid-template-columns: repeat(3, 1fr); }
+.reflection-card { border: 1px solid #e2e8f0; border-radius: 20px; display: flex; flex-direction: column; min-height: 230px; padding: 24px; }
+.reflection-card__category { align-self: flex-start; border-radius: 999px; color: #1d52b8; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 7px 10px; text-transform: uppercase; }
+.reflection-card h3 { color: #101e33; font-size: 19px; letter-spacing: -.015em; line-height: 1.25; margin: 17px 0 10px; }
+.reflection-card > p { color: #64748b; font-size: 13px; line-height: 1.65; margin: 0; }
+.reflection-card footer { margin-top: auto; }
+.reflection-card__actions { display: flex; gap: 12px; }
+.reflection-card__actions a, .reflection-card__actions button { background: none; border: 0; color: #1d52b8; cursor: pointer; font: 700 12px "Plus Jakarta Sans", sans-serif; padding: 0; }
+.reflections-status { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 14px; line-height: 1.6; margin: 0; padding: 28px; text-align: center; }
+.pag { display: flex; justify-content: center; margin-top: 30px; }
+@media (max-width: 800px) { .reflections-page { padding-top: 48px; } .reflections-shell { padding-left: 20px; padding-right: 20px; } .featured-reflection__copy { padding: 30px; } .reflection-grid { grid-template-columns: 1fr; } .reflections-publications__heading { align-items: flex-start; flex-direction: column; gap: 18px; } .reflections-featured, .reflections-publications { padding-bottom: 64px; } }

@@ -1,57 +1,73 @@
 .side-drawer {
-  height: 100%;
   background-color: white;
-  box-shadow: 0px 0px 10px #007cc7;
+  box-shadow: -8px 0 30px rgba(15, 23, 42, 0.18);
+  height: 100%;
+  max-width: 85vw;
+  opacity: 0;
   position: fixed;
-  top: 0;
   right: 0;
+  top: 0;
+  transform: translateX(100%);
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out,
+    visibility 0s linear 0.25s;
+  visibility: hidden;
   width: 16rem;
   z-index: 200;
-  opacity: 0.3;
-  transform: translateX(100%);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-in-out;
-  #close {
-    display: flex;
-    flex-direction: row;
-    position: absolute;
-    right: 0;
-    padding-right: 2rem;
-    font-size: 5rem;
-    transition: 0.4s;
-  }
-  #close:hover {
+
+  .side-drawer__close {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: #334155;
     cursor: pointer;
-    transform: scale(1.1, 1.1);
-    color: #007cc7;
+    display: flex;
+    font-size: 1.5rem;
+    height: 2.75rem;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    width: 2.75rem;
   }
+
+  .side-drawer__close:hover {
+    color: #1d52b8;
+  }
+
   .navbar-nav {
-    height: 100%;
+    align-items: center;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    //justify-content: center;
-    margin: 70px 0;
+    height: 100%;
+    margin: 0;
+    overflow-y: auto;
+    padding: 70px 0 32px;
+
     .nav-item {
       display: flex;
-      //justify-content: center;
       padding: 1rem 15px;
-      color: grey;
+      box-sizing: border-box;
+      color: #475569;
       text-decoration: none;
       font-size: 1.2rem;
-      //border-bottom: solid thin rgb(163, 163, 163);
-      border: opacity 0.5;
       width: 100%;
     }
+
     .nav-item:hover,
-    .nav-item:active {
-      color: #007cc7;
+    .nav-item:active,
+    .nav-item:focus-visible {
+      color: #1d52b8;
     }
   }
 }
+
 .side-drawer.open {
   opacity: 1;
   transform: translateX(0);
-  transition: opacity 0.8s ease-in, transform 0.8s ease-in-out;
+  transition: opacity 0.25s ease-in, transform 0.25s ease-in;
+  visibility: visible;
 }
 
 .donate-side {
@@ -70,12 +86,13 @@
     //font-size: 2rem;
     background-color: rgba(255, 255, 0, 0);
     color: #004e7c;
-    transition: 0.5s;
+    transition: background-color 0.2s, transform 0.2s;
     #paypal {
       margin-left: 0.4rem;
     }
   }
-  .submit:hover {
+  .submit:hover,
+  .submit:focus-visible {
     transform: scale(1.05, 1.05);
     background-color: white;
     color: #004e7c;

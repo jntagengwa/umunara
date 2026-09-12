@@ -11,26 +11,31 @@ import {
   faMicrophoneAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { faEnvelopeOpen } from "@fortawesome/free-regular-svg-icons";
+import logo from "../../umunara_logo.png";
 import "./footer.scss";
 
 class Footer extends Component {
   render() {
     return (
       <footer className="footer-container">
-        <div className="container footer-extended">
-          <div className="mission">
-            <h3>Our Vision</h3>
+        <div className="footer-extended">
+          <div className="footer-brand">
+            <img src={logo} alt="Umunara Inc." />
             <p>
               We hope to build a Strong and God-fearing Community that will be
               the beacon of ever lasting peace and unity in our region, rooted
               in Jesus and held together by Faith and the Holy Spirit.
             </p>
+          </div>
+          <div className="mission">
+            <h3>Our Vision</h3>
             <p>
               We hope to spread the good news of our Lord’s resurrection and
               prepare all nations for his return.
             </p>
           </div>
           <div className="donate">
+            <h3>Support &amp; Listen</h3>
             <form
               action="https://www.paypal.com/donate"
               method="post"
@@ -54,18 +59,14 @@ class Footer extends Component {
                 Donate <FontAwesomeIcon icon={faPaypal} id="paypal" />
               </button>
             </form>
-            <div>
-              <a
-                href="https://umunarainc.podbean.com/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <button className="submit">
-                  Podcast{" "}
-                  <FontAwesomeIcon icon={faMicrophoneAlt} id="podcast" />
-                </button>
-              </a>
-            </div>
+            <a
+              className="submit"
+              href="https://umunarainc.podbean.com/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Podcast <FontAwesomeIcon icon={faMicrophoneAlt} id="podcast" />
+            </a>
           </div>
           <div className="contact">
             <h3>Contact Us</h3>
@@ -90,6 +91,7 @@ class Footer extends Component {
           </p>
           <div className="socials">
             <a
+              aria-label="Umunara on Facebook"
               href="https://www.facebook.com/umunara.prayer"
               rel="noopener noreferrer"
               target="_blank"
@@ -97,6 +99,7 @@ class Footer extends Component {
               <FontAwesomeIcon icon={faFacebook} id="facebook" />
             </a>
             <a
+              aria-label="Umunara on YouTube"
               href="https://www.youtube.com/UMUNARAINC"
               rel="noopener noreferrer"
               target="_blank"

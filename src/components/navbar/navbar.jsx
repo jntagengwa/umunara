@@ -2,17 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import DrawerToggle from "../sideDrawer/drawerToggle";
 import img from "../../umunara_logo.png";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import "./navbar.scss";
 
-const NavBar = ({ drawerClickHandler }) => {
+const NavBar = ({ drawerClickHandler, drawerIsOpen, drawerToggleRef }) => {
   return (
     <header className="navbar">
       <nav className="navbar__navigation">
         <div className="navbar__logo">
-          <Link className="logo" to="/">
-            <img src={img} alt="logo" />
+          <Link className="logo" to="/" title="Umunara means Watchtower">
+            <img src={img} alt="Umunara Inc." />
           </Link>
         </div>
 
@@ -20,8 +18,8 @@ const NavBar = ({ drawerClickHandler }) => {
           <Link className="items" to="/">
             Home
           </Link>
-          <Link className="items" to="/calendar">
-            Calendar
+          <Link className="items" to="/about-us">
+            About Us
           </Link>
           <Link className="items" to="/blog">
             Blog
@@ -29,40 +27,19 @@ const NavBar = ({ drawerClickHandler }) => {
           {/* <Link className="items" to="/registrations/new">
             Registration
           </Link> */}
-          <Link className="items" to="/donate">
-            Donate
-          </Link>
-          <Link className="items" to="/about-us">
-            About Us
+          <Link className="items" to="/calendar">
+            Events
           </Link>
         </div>
         <div className="rightt">
-          <div className="donate-nav">
-            <form
-              action="https://www.paypal.com/donate"
-              method="post"
-              target="_blank"
-            >
-              <input
-                type="hidden"
-                name="hosted_button_id"
-                value="KTYR3LCAUW7VL"
-              />
-              {/* <input
-              type="image"
-              src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif"
-              border="0"
-              name="submit"
-              title="PayPal - The safer, easier way to pay online!"
-              alt="Donate with PayPal button"
-            /> */}
-              <button type="submit" className="submit">
-                Donate <FontAwesomeIcon icon={faPaypal} id="paypal" />
-              </button>
-            </form>
-          </div>
+          <Link className="navbar__signin" to="/login">Member Sign In</Link>
+          <Link className="navbar__give" to="/donate">Give</Link>
           <div className="drawer-toggle">
-            <DrawerToggle click={drawerClickHandler} />
+            <DrawerToggle
+              click={drawerClickHandler}
+              isOpen={drawerIsOpen}
+              toggleRef={drawerToggleRef}
+            />
           </div>
         </div>
       </nav>

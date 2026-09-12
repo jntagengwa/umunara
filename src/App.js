@@ -29,19 +29,35 @@ class App extends Component {
     sideDrawerOpen: false,
   };
 
+  drawerToggleRef = React.createRef();
+  drawerCloseButtonRef = React.createRef();
+
   componentDidMount() {
     const user = auth.getCurrentUser();
     this.setState({ user });
   }
 
   toggleClickHandler = () => {
-    this.setState((prevState) => {
-      return { sideDrawerOpen: !prevState.sideDrawerOpen };
+    if (this.state.sideDrawerOpen) {
+      this.handleBackdropClick();
+      return;
+    }
+
+    this.setState({ sideDrawerOpen: true }, () => {
+      const closeButton = this.drawerCloseButtonRef.current;
+      if (closeButton) {
+        closeButton.focus();
+      }
     });
   };
 
   handleBackdropClick = () => {
-    this.setState({ sideDrawerOpen: false });
+    this.setState({ sideDrawerOpen: false }, () => {
+      const toggleButton = this.drawerToggleRef.current;
+      if (toggleButton) {
+        toggleButton.focus();
+      }
+    });
   };
 
   render() {
@@ -53,8 +69,13 @@ class App extends Component {
     return (
       <React.Fragment>
         <ToastContainer />
-        <NavBar drawerClickHandler={this.toggleClickHandler} />
+        <NavBar
+          drawerClickHandler={this.toggleClickHandler}
+          drawerIsOpen={this.state.sideDrawerOpen}
+          drawerToggleRef={this.drawerToggleRef}
+        />
         <SideDrawer
+          closeButtonRef={this.drawerCloseButtonRef}
           show={this.state.sideDrawerOpen}
           backdropHandler={this.handleBackdropClick}
         />

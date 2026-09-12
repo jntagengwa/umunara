@@ -33,7 +33,7 @@ export class Register extends Form {
   render() {
     return (
       <div className="inner-container">
-        <div className="header">Sing Up</div>
+        <div className="header">Create your account</div>
         <div className="box">
           <div className="l-form">
             <div className="form-set">

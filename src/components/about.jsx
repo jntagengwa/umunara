@@ -1,15 +1,15 @@
 import React, { Component } from "react";
 import img from "../about.jpeg";
+import "./home.scss";
 
 class About extends Component {
   render() {
     return (
-      <div className="about-main container">
-        <div className="header">
-          <h1>About Us</h1>
-        </div>
-        <div className="content">
-          <div className="about-word">
+      <div className="about-page">
+        <section className="about-section ministry-shell">
+          <div className="about-section__copy">
+            <p className="eyebrow">About Umunara</p>
+            <h1>About Us</h1>
             <p>
               As Prophet Habakkuk asserted in his second chapter verse 1 saying,
               “I will stand at my watch and station myself on the ramparts; I
@@ -20,8 +20,8 @@ class About extends Component {
               nations who meet primarily on the phone conference call to wait
               for the Lord God. In the course of waiting, we worship, praise,
               and pray God and study the word of God.
-              <br></br>
-              <br></br>
+            </p>
+            <p>
               Umunara started early 2007 by few individuals who were holding
               prayer meetings over the phone through three-way conference call.
               These few individuals came to be known as founder-members of
@@ -36,10 +36,10 @@ class About extends Component {
               God’s blessings to you!
             </p>
           </div>
-          <div className="img">
+          <div className="about-section__image">
             <img src={img} alt="Umunara Conference" />
           </div>
-        </div>
+        </section>
       </div>
     );
   }

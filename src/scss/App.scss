@@ -3,6 +3,7 @@
 @import "./calender.scss";
 @import "./donate.scss";
 @import "./form.scss";
+@import "./history.scss";
 @import "./launcher.scss";
 @import "./masonryPost.scss";
 @import "./memberForm.scss";
@@ -11,53 +12,16 @@
 @import "./postGrid.scss";
 @import "./tagsRow.scss";
 
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+
 html body {
-  font-family: "Josefin Sans", sans-serif, "Source Sans Pro", sans-serif;
-  //font-weight: 500;
-  //background-color: #f8f9fa;
-  //background-color: #f8f9fa;
+  background: #fafbfd;
+  color: #1e293b;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 #root {
-  background-image: linear-gradient(
-      236deg,
-      transparent 0%,
-      transparent 6%,
-      rgba(42, 142, 255, 0.12) 6%,
-      rgba(42, 142, 255, 0.12) 22%,
-      transparent 22%,
-      transparent 100%
-    ),
-    linear-gradient(
-      146deg,
-      transparent 0%,
-      transparent 20%,
-      rgba(42, 142, 255, 0.12) 20%,
-      rgba(42, 142, 255, 0.12) 47%,
-      transparent 47%,
-      transparent 100%
-    ),
-    linear-gradient(
-      236deg,
-      transparent 0%,
-      transparent 24%,
-      rgba(42, 142, 255, 0.12) 24%,
-      rgba(42, 142, 255, 0.12) 62%,
-      transparent 62%,
-      transparent 100%
-    ),
-    linear-gradient(
-      146deg,
-      transparent 0%,
-      transparent 73%,
-      rgba(42, 142, 255, 0.12) 73%,
-      rgba(42, 142, 255, 0.12) 75%,
-      transparent 75%,
-      transparent 100%
-    ),
-    linear-gradient(191deg, rgb(248, 249, 250), rgb(248, 249, 250));
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  background: #fafbfd;
+  min-height: 100%;
 }
 a {
   text-decoration: none !important;
@@ -66,12 +30,26 @@ a {
 h1,
 h2,
 h3 {
-  font-family: "Josefin Sans", sans-serif;
-  color: #007cc7;
+  font-family: "Space Grotesk", sans-serif;
 }
 
 p {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+:focus-visible {
+  outline: 3px solid #1d52b8;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
 }
 
 .about-main {
@@ -127,59 +105,6 @@ p {
     .img {
       img {
         width: 100%;
-      }
-    }
-  }
-}
-
-.history-main {
-  display: flex;
-  flex-direction: column;
-  padding: 0 30px;
-  //width: 78%;
-  .header {
-    margin: 2rem;
-    h1 {
-      font-family: "Josefin Sans", sans-serif;
-      color: #007cc7;
-    }
-  }
-  .history-content {
-    display: flex;
-    flex-direction: row;
-    .left {
-      padding: 1rem;
-      display: grid;
-      font-family: "Source Sans Pro", sans-serif;
-    }
-    .right {
-      padding: 1rem;
-      //display: grid;
-      font-family: "Source Sans Pro", sans-serif;
-      .img {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        img {
-          display: flex;
-          width: 75%;
-          height: 20%;
-        }
-      }
-    }
-  }
-}
-
-@media (max-width: 700px) {
-  .history-main {
-    .history-content {
-      flex-direction: column;
-      .right {
-        .img {
-          img {
-            width: 40%;
-          }
-        }
       }
     }
   }

@@ -4,12 +4,40 @@ import img from "../umunara_logo.png";
 class History extends Component {
   render() {
     return (
-      <div className="history-main container">
-        <div className="header">
-          <h1>History</h1>
-        </div>
-        <div className="history-content">
-          <div className="left">
+      <div className="history-page">
+        <header className="history-page__title-band">
+          <div className="history-page__shell">
+            <p className="history-page__eyebrow">Our story</p>
+            <h1>History</h1>
+          </div>
+        </header>
+
+        <div className="history-page__shell history-page__body">
+          <section
+            aria-labelledby="history-milestones-title"
+            className="history-page__milestones"
+          >
+            <h2 id="history-milestones-title">Founding milestones</h2>
+            <ol>
+              <li>
+                <time dateTime="2007">2007</time>
+                <span>Prayer meetings begin</span>
+              </li>
+              <li>
+                <time dateTime="2007-09-23">2007</time>
+                <span>Conference account established</span>
+              </li>
+              <li>
+                <time dateTime="2008-10-02">2008</time>
+                <span>Umunara incorporated</span>
+              </li>
+            </ol>
+          </section>
+
+          <article
+            aria-label="The history of Umunara"
+            className="history-page__article"
+          >
             <p>
               In early 2007 a few individuals started holding prayer meetings
               over the phone through three-way conference call. As the number of
@@ -60,8 +88,6 @@ class History extends Component {
               Once in a while, female and male departments meet together to
               offer valuable teachings needed for couples and couples to be.
             </p>
-          </div>
-          <div className="right">
             <p>
               As prayer is the key to the success of Umunara, a Prayer
               department was established to coordinate the prayer chain 24/7 at
@@ -114,9 +140,36 @@ class History extends Component {
               members, please drop a line at postmaster@umunara.org or send us a
               written note at Umunara, Inc. P.O Box 505194, Chelsea, MA 02150.
             </p>
-            <div className="img">
-              <img src={img} alt="logo" />
-            </div>
+          </article>
+
+          <div className="history-page__supporting">
+            <aside
+              aria-labelledby="history-prayer-watch-title"
+              className="history-page__prayer-watch"
+            >
+              <p className="history-page__eyebrow history-page__eyebrow--light">
+                Join the watch
+              </p>
+              <h2 id="history-prayer-watch-title">Friday prayer watch</h2>
+              <dl>
+                <div>
+                  <dt>Time</dt>
+                  <dd>10:00 PM Eastern Time (USA &amp; Canada) / 0300GMT</dd>
+                </div>
+                <div>
+                  <dt>Conference</dt>
+                  <dd>218-548-0820</dd>
+                </div>
+                <div>
+                  <dt>Pass code</dt>
+                  <dd>13579#</dd>
+                </div>
+              </dl>
+            </aside>
+
+            <figure className="history-page__mark">
+              <img src={img} alt="Umunara ministry mark" />
+            </figure>
           </div>
         </div>
       </div>

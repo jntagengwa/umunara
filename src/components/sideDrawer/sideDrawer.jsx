@@ -6,7 +6,7 @@ import { faPaypal } from "@fortawesome/free-brands-svg-icons";
 import auth from "../../services/authService";
 import "./sideDrawer.scss";
 
-const SideDrawer = ({ user, show, backdropHandler }) => {
+const SideDrawer = ({ user, show, backdropHandler, closeButtonRef }) => {
   let drawerClasses = "side-drawer";
   if (show) {
     drawerClasses = "side-drawer open";
@@ -15,8 +15,21 @@ const SideDrawer = ({ user, show, backdropHandler }) => {
   user = auth.getCurrentUser();
 
   return (
-    <nav className={drawerClasses}>
-      <FontAwesomeIcon icon={faTimes} id="close" onClick={backdropHandler} />
+    <nav
+      aria-hidden={!show}
+      aria-label="Mobile navigation"
+      className={drawerClasses}
+      id="mobile-navigation"
+    >
+      <button
+        aria-label="Close navigation menu"
+        className="side-drawer__close"
+        onClick={backdropHandler}
+        ref={closeButtonRef}
+        type="button"
+      >
+        <FontAwesomeIcon aria-hidden="true" icon={faTimes} />
+      </button>
       <div className="navbar-nav">
         <NavLink className="nav-item" to="/" onClick={backdropHandler}>
           Home

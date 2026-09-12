@@ -1,12 +1,25 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaypal } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import givingCommunity from "../images/giving-community.png";
 
-const Donate = () => {
-  return (
-    <div className="d-info container">
+const Donate = () => (
+  <div className="giving-page">
+    <section className="giving-hero giving-shell">
       <div>
+        <p className="eyebrow"><span className="eyebrow__dot" /> Umunara, Inc.</p>
         <h1>Donate</h1>
+      </div>
+      <div className="giving-hero__verse">
+        <img src={givingCommunity} alt="Umunara community gathering around Scripture in prayer" />
+        <div><p>EVERY PENNY OF YOUR DONATION GOES TO THE WORK OF GOD</p></div>
+      </div>
+    </section>
+
+    <section className="giving-shell giving-panel" id="give-now">
+      <div className="giving-panel__intro">
+        <p className="eyebrow">Support our work</p>
+        <h2>Dear Friends in Christ</h2>
         <p>
           Dear Friends in Christ, looking at our purpose and vision, it is a
           no-brainer to realize that we have a long way to go to accomplish the
@@ -31,38 +44,14 @@ const Donate = () => {
           </li>
           <li>Donating through PayPal.</li>
         </ul>
-        <p>
-          <strong>EVERY PENNY OF YOUR DONATION GOES TO THE WORK OF GOD</strong>
-        </p>
       </div>
-      <form
-        action="https://www.paypal.com/donate"
-        method="post"
-        target="_"
-        className="d-form"
-      >
+      <form action="https://www.paypal.com/donate" method="post" target="_blank" className="giving-form">
         <input type="hidden" name="hosted_button_id" value="KTYR3LCAUW7VL" />
-        {/* <input
-            type="image"
-            src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif"
-            border="0"
-            name="submit"
-            title="PayPal - The safer, easier way to pay online!"
-            alt="Donate with PayPal button"
-          />
-          <img
-            alt=""
-            border="0"
-            src="https://www.paypal.com/en_US/i/scr/pixel.gif"
-            width="1"
-            height="1"
-          /> */}
-        <button type="submit" className="submit">
-          Donate <FontAwesomeIcon icon={faPaypal} id="paypal" />
-        </button>
+        <button type="submit" className="giving-submit">Give securely with PayPal <FontAwesomeIcon icon={faPaypal} /></button>
+        <p className="giving-form__note"><strong>EVERY PENNY OF YOUR DONATION GOES TO THE WORK OF GOD</strong></p>
       </form>
-    </div>
-  );
-};
+    </section>
+  </div>
+);
 
 export default Donate;
