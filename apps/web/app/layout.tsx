@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 import './globals.css'
+import './public-site.css'
 
 export const metadata: Metadata = {
   title: 'Umunara',

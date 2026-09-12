@@ -7,7 +7,10 @@ export default async function BlogPage({ searchParams }: { searchParams: PageSea
   const posts = await readPublicPosts(await readPageNumber(searchParams))
   return (
     <main className="page-content" id="main-content">
-      <h1>Umunara Inc, Blog</h1>
+      <header className="page-introduction">
+        <p className="section-label">From our community</p>
+        <h1>Umunara Inc, Blog</h1>
+      </header>
       <PostList posts={posts.data} />
       <Pagination {...posts} path="/blog" />
     </main>

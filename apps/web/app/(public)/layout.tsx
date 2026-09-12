@@ -4,10 +4,10 @@ import { SiteFooter } from '../../components/site-footer'
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <div className="public-site">
       <SiteHeader />
       {children}
       <SiteFooter />
-    </>
+    </div>
   )
 }
